@@ -17,6 +17,6 @@ authApiClient.interceptors.request.use((req) => {
 authApiClient.interceptors.response.use((response) => {
   console.log("Success Response", response)
 }, (error) => {
-  console.log("Error", error, error.response.status, error.response.headers)
+  console.log("Error fetching request", error, error.response.status, error.response.headers)
 })
 
