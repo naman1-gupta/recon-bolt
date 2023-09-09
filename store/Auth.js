@@ -9,6 +9,14 @@ export const AuthContext = createContext({
     },
     authenticate: (token) => {},
     logout: () => {},
+    geo: {
+        affinities: {
+            live: "",
+            pbe: ""
+        },
+        token: ""
+    },
+    setGeo: () => {}
 });
 
 
@@ -16,6 +24,7 @@ export function AuthContextProvider({children}) {
     const [accessToken, setAccessToken] = useState('')
     const [idToken, setIdToken] = useState('')
     const [entitlementsToken, setEntitlementsToken] = useState('')
+    const [geoToken, setGeoToken] = useState({})
 
     const authenticate = (token) => {
         setIdToken(token.id_token)
@@ -25,8 +34,17 @@ export function AuthContextProvider({children}) {
         AsyncStorage.setItem("auth", JSON.stringify({
             access_token: token.access_token,
             id_token: token.id_token,
-            entitlementsToken: token.entitlements_token,
+            entitlements_token: token.entitlements_token,
         }))
+    }
+
+    const setGeo = (geo) => {
+        setGeoToken(geo)
+        AsyncStorage.setItem("geo", JSON.stringify(geo))
+    }
+
+    const setEntitlements = (token) => {
+        setEntitlementsToken(token)
     }
 
     const logout = () => {
@@ -34,6 +52,7 @@ export function AuthContextProvider({children}) {
         setAccessToken('')
         setEntitlementsToken('')
 
+        AsyncStorage.removeItem("auth")
     }
 
     const value = {
@@ -43,7 +62,9 @@ export function AuthContextProvider({children}) {
             entitlementsToken: entitlementsToken,
         },
         authenticate: authenticate,
-        logout: logout
+        logout: logout,
+        geo: geoToken,
+        setGeo: setGeo,
     }
     return (
         <AuthContext.Provider value={value}>
