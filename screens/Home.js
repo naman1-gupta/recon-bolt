@@ -1,4 +1,4 @@
-import {StyleSheet, View, Text, Alert, TextInput, Button} from "react-native";
+import {StyleSheet, View, Text, Alert, TextInput, Button, Pressable} from "react-native";
 import {useEffect, useState} from "react";
 import {
     getConfig,
@@ -10,6 +10,7 @@ import {
 } from "../utils/game";
 import Dropdown from "react-native-input-select";
 import {useNavigation} from "@react-navigation/native";
+import {Ionicons} from "@expo/vector-icons";
 
 const QUEUE_TYPES = {
     'swiftplay': 'Swiftplay',
@@ -76,7 +77,7 @@ const Home = () => {
     useEffect(() => {
         console.log("Getting pregame status")
         getPreGameMatchStatus(matchId).then(response => {
-            console.log("pregame status, navigating", response)
+            console.log("pregame status, navigating", response, matchId)
             if ("AllyTeam" in response) {
                 navigation.navigate("AgentSelect", {
                     matchId: matchId
@@ -105,6 +106,7 @@ const Home = () => {
             const timer = setInterval(() => {
                 getPreGamePlayerStatus().then(response => {
                     if(response.matchId) {
+                        console.log("Setting matchId", response.matchId)
                         setMatchId(response.matchId)
                         clearInterval(timer)
                     }
@@ -125,7 +127,9 @@ const Home = () => {
         <View style={styles.screen}>
             <View style={styles.partyContainer}>
                 <Text style={styles.partyTitleText}>Party</Text>
-                <Button title={"Refresh"} onPress={refresh}/>
+                <Pressable onPress={refresh}>
+                    <Ionicons name={"refresh-outline"} size={24} color={'black'}/>
+                </Pressable>
             </View>
             <View>
                 <View style={styles.queueContainer}>
@@ -143,8 +147,7 @@ const Home = () => {
                         ]}
                         selectedValue={partyDetails?.queueId}
                         onValueChange={(value) => changeQueue(value)}
-                        primaryColor={'green'}
-                        disabled={!partyDetails.queueId}
+                        disabled={true}
                     />
                     <View style={{minHeight: 40, flexDirection: 'row', alignItems: 'center'}}>
                         {
@@ -159,7 +162,7 @@ const Home = () => {
 
                 </View>
                 {
-                    partyDetails.state !== "MATCHMAKING" && <Button title={`Start matchmaking`} onPress={queueMatch}/>
+                    partyDetails.state !== "MATCHMAKING" && <Button title={`Start matchmaking`} onPress={queueMatch} disabled={partyDetails.state}/>
                 }
                 {
                     partyDetails.state === "MATCHMAKING" && <Button title={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>

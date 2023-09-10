@@ -73,7 +73,9 @@ const AuthenticatedStack = () => {
                                                        }}/>,
         headerRight: ({tintColor}) => <Ionicons name={'log-out'} color={tintColor} size={24} onPress={authContext.logout}/>
     }}>
-        <Tab.Screen name={"Home"} component={Home} />
+        <Tab.Screen name={"Home"} component={Home} options={{
+            tabBarIcon: ({color}) => <Ionicons name={'home-outline'} size={24} />
+        }}/>
         <Tab.Screen name={"AgentSelect"}
                     component={AgentSelect}
                     options={{ tabBarButton: (props) => null }} />
@@ -114,8 +116,8 @@ function Login() {
 
     return (
         <View style={styles.container}>
-            {/*<Button title={"Login"} onPress={performLogin} />*/}
-            <Button title={"Login"} onPress={akmsdkmasm} />
+            <Button title={"Login"} onPress={performLogin} />
+            {/*<Button title={"Login"} onPress={akmsdkmasm} />*/}
         </View>
     )
 }

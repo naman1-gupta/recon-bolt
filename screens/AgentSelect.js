@@ -1,7 +1,7 @@
 import {StatusBar, FlatList, Image, Text, View, Pressable, StyleSheet, Button, Dimensions} from 'react-native';
 import {agentData} from "../data/agent-data";
-import {lockAgent, hoverAgent} from "../utils/game";
-import {useState} from "react";
+import {lockAgent, hoverAgent, getCoreGamePlayerStatus} from "../utils/game";
+import {useEffect, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 
 function AgentSelect({route, navigation}) {
@@ -9,6 +9,16 @@ function AgentSelect({route, navigation}) {
     const [agent, selectAgent] = useState(null)
 
     const matchId = route.params?.matchId
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            getCoreGamePlayerStatus().then(response => {
+                clearInterval(timer)
+
+                navigation.navigate("LiveMatch")
+            })
+        }, 2000)
+    }, []);
     const onAgentSelected = (agentId) => {
         console.log("Selected agent id", agentId, matchId);
         selectAgent(agentId)

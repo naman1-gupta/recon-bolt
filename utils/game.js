@@ -3,6 +3,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const PLAYER_ID = '610ee2b8-0ad2-5fff-a819-defc284b519d'
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
+const PROXY_URL = 'http://192.168.1.3:8000/proxy?url='
+
+const riotClient = axios.create({
+    headers: {
+        'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
+        'x-riot-clientversion':'release-07.05-shipping-4-974204',
+        'accept': '*/*',
+        'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
+    },
+})
+
+riotClient.interceptors.request.use((config) => {
+    const encodedURL = encodeURIComponent(config.url)
+    const url = `${PROXY_URL}${encodedURL}`
+
+    config.url = url
+    return config
+}, (error) => {
+    console.log("Error creating request", error)
+})
 
 
 const SERVICE_URLS = [
@@ -52,12 +72,7 @@ export async function getConfig() {
             url: `https://shared.${geo.affinities.live}.a.pvp.net/v1/config/ap`,
             method: 'get',
             headers: {
-                'authorization': auth.access_token,
-                'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
+
             }
         }
 
@@ -81,28 +96,26 @@ export async function getConfig() {
 export async function getPlayerPartyId(playerId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
     const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    console.log("SERVICE_URL", SERVICE_URL)
 
     return new Promise((resolve, reject) => {
+        let url = `${SERVICE_URL}/parties/v1/players/${PLAYER_ID}`
+        // url = encodeURIComponent(url)
         const config = {
-            url: `${SERVICE_URL}/parties/v1/players/${PLAYER_ID}`,
+            url: `${url}`,
             method: 'get',
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform':RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
-
         }
 
-
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
+            console("resolved", response.status)
             console.log("Got party id", response.data)
             resolve(response.data["CurrentPartyID"])
         }).catch((err) => {
-            console.log("Error fetching party details", err, err.response.data)
+            console.log("Error fetching party details", err)
             if(err.response.status === 404){
                 console.log("resolving with empty value")
                 resolve('')
@@ -125,14 +138,10 @@ export async function getPartyDetails(partyId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             }
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             const partyDetails = {}
             partyDetails.id = response.data["ID"]
             partyDetails.queueId = response.data["MatchmakingData"]["QueueID"]
@@ -164,17 +173,13 @@ export async function switchQueue(queueType, partyId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
             data: JSON.stringify({
                 "queueID": queueType
             })
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             console.log("switchQueue res", response.data)
             const partyDetails = {}
             partyDetails.id = response.data["ID"]
@@ -206,15 +211,11 @@ export async function startMatchmaking(partyId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
             data: JSON.stringify({})
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             console.log("startmatchmaking res", response.data)
             const partyDetails = {}
             partyDetails.id = response.data["ID"]
@@ -245,16 +246,12 @@ export async function getPreGamePlayerStatus(playerId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             }
         }
 
         // console.log(config)
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             const matchDetails = {}
             matchDetails.matchId = response.data["MatchID"]
             resolve(matchDetails)
@@ -282,15 +279,11 @@ export async function getCoreGamePlayerStatus(playerId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
             data: JSON.stringify({})
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             const matchDetails = {}
             matchDetails.matchId = response.data["MatchID"]
             resolve(matchDetails)
@@ -316,14 +309,10 @@ export async function getPreGameMatchStatus(matchId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             }
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             console.log("matchStatus", response.data)
             resolve(response.data)
         }).catch((err) => {
@@ -348,14 +337,10 @@ export async function hoverAgent(agentId, matchId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             resolve(response.data)
         }).catch((err) => {
             if(err.response.status === 404){
@@ -380,14 +365,10 @@ export async function lockAgent(agentId, matchId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             resolve(response.data)
         }).catch((err) => {
             if(err.response.status === 404){
@@ -412,15 +393,11 @@ export async function leaveMatchmaking(partyId) {
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
                 'x-riot-entitlements-jwt': auth.entitlements_token,
-                'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-                'x-riot-clientversion':'release-07.05-shipping-4-974204',
-                'accept': '*/*',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
             },
             data: JSON.stringify({})
         }
 
-        axios.request(config).then((response) => {
+        riotClient.request(config).then((response) => {
             console.log("leave matchmaking res", response.data)
             const partyDetails = {}
             partyDetails.id = response.data["ID"]

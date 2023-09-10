@@ -5466,10 +5466,10 @@ react-is@^17.0.1:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.2.tgz#e691d4a8e9c789365655539ab372762b0efb54f0"
   integrity sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==
 
-react-native-input-select@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/react-native-input-select/-/react-native-input-select-1.1.6.tgz#2b4c93451ccd3134021e8c434da24e923949eb45"
-  integrity sha512-cIxrzRZZxe52ksxTmdmaWzeCTVCsa27QaPiIKiNC3Cg6/8C5dbPP1bdIVkA397lxqhbr5VAJU1ekvRQAismeoQ==
+react-native-input-select@^1.1.9:
+  version "1.1.9"
+  resolved "https://registry.yarnpkg.com/react-native-input-select/-/react-native-input-select-1.1.9.tgz#adc64845df41d0f4af212d0c8bcabcfbbccc0b92"
+  integrity sha512-7NK552xSojv408lNseN0G8XAgx8fl0xuJq9jA2h3IAiq48H6IO6Fy7ZTe7iN8xNxDqCJ9TTvsSxMBtL6FocNsg==
 
 react-native-safe-area-context@4.6.3:
   version "4.6.3"
