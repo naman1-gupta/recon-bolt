@@ -17,8 +17,8 @@ const QUEUE_TYPES = {
     'competitive': 'Competitive',
     'unrated': 'Unrated',
     'spikerush': 'Spike Rush',
-    'hurm': 'Escalation',
-    'ggteam': 'Team Deathmatch',
+    'ggteam': 'Escalation',
+    'hurm': 'Team Deathmatch',
     'deathmatch' : 'Deathmatch'
 }
 
@@ -118,7 +118,7 @@ const Home = () => {
     }
 
     const leaveMatchmakingQueue = () => {
-        leaveMatchmaking().then(response => {
+        leaveMatchmaking(partyId).then(response => {
             setPartyDetails(response)
         })
     }
@@ -141,8 +141,8 @@ const Home = () => {
                             {label: 'Competitive', value: 'competitive'},
                             {label: 'Unrated', value: 'unrated'},
                             {label: 'Spike Rush', value: 'spikerush'},
-                            {label: 'Escalation', value: 'escalation'},
-                            {label: 'Team Deathmatch', value: 'teamdeathmatch'},
+                            {label: 'Escalation', value: 'ggteam'},
+                            {label: 'Team Deathmatch', value: 'hurm'},
                             {label: 'Deathmatch', value: 'deathmatch'}
                         ]}
                         selectedValue={partyDetails?.queueId}
@@ -151,18 +151,18 @@ const Home = () => {
                     />
                     <View style={{minHeight: 40, flexDirection: 'row', alignItems: 'center'}}>
                         {
-                            partyDetails.queueId && (
+                            partyDetails.queueId !== null ? (
                                 <>
-                                    <Text style={styles.currentQueueLabel}>Current</Text>
-                                    <Text style={styles.currentQueueText}>{QUEUE_TYPES[partyDetails.queueId]}</Text>
+                                    <Text style={[styles.currentQueueLabel]}>Current</Text>
+                                    <Text style={[styles.currentQueueText]}>{QUEUE_TYPES[partyDetails.queueId]}</Text>
                                 </>
-                            )
+                            ): null
                         }
                     </View>
 
                 </View>
                 {
-                    partyDetails.state !== "MATCHMAKING" && <Button title={`Start matchmaking`} onPress={queueMatch} disabled={partyDetails.state}/>
+                    partyDetails.state !== "MATCHMAKING" && <Button title={`Start matchmaking`} onPress={queueMatch}/>
                 }
                 {
                     partyDetails.state === "MATCHMAKING" && <Button title={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>

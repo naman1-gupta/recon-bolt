@@ -9,6 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Home from "./screens/Home";
 import {Ionicons} from '@expo/vector-icons';
 import AgentSelect from "./screens/AgentSelect";
+import LiveMatch from "./screens/LiveMatch";
 
 
 const Tab = createBottomTabNavigator();
@@ -79,6 +80,14 @@ const AuthenticatedStack = () => {
         <Tab.Screen name={"AgentSelect"}
                     component={AgentSelect}
                     options={{ tabBarButton: (props) => null }} />
+        <Tab.Screen name={"LiveMatch"}
+                    component={LiveMatch}
+                    options={{
+                        tabBarIcon: ({color}) =>
+                            <Ionicons name={"game-controller-outline"}
+                                      size={24}
+                                      color={color}/>
+                    }} />
     </Tab.Navigator>
 }
 

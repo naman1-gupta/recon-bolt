@@ -10,15 +10,6 @@ function AgentSelect({route, navigation}) {
 
     const matchId = route.params?.matchId
 
-    useEffect(() => {
-        const timer = setInterval(() => {
-            getCoreGamePlayerStatus().then(response => {
-                clearInterval(timer)
-
-                navigation.navigate("LiveMatch")
-            })
-        }, 2000)
-    }, []);
     const onAgentSelected = (agentId) => {
         console.log("Selected agent id", agentId, matchId);
         selectAgent(agentId)
@@ -32,6 +23,13 @@ function AgentSelect({route, navigation}) {
     const onAgentLocked = () => {
         console.log("agent selected", agent, matchId)
         lockAgent(agent, matchId).then(response => {
+            const timer = setInterval(() => {
+                getCoreGamePlayerStatus().then(response => {
+                    clearInterval(timer)
+
+                    navigation.navigate("LiveMatch", {matchId: matchId})
+                })
+            }, 2000)
             console.log("Agent lock response", response)
         }).catch(err => {
             console.log("Agent lock error", err)
