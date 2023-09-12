@@ -36,4 +36,4 @@ yarn-error.*
 
 
 .yarn/*
-secrets*
+secrets.js
