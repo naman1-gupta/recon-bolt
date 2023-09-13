@@ -76,16 +76,16 @@ const AuthenticatedStack = () => {
                                                 onPress={authContext.logout}/>
     }}>
         <Tab.Screen name={"Home"} component={Home} options={{
-            tabBarIcon: ({color}) => <Ionicons name={'home-outline'} size={24} />
+            tabBarIcon: ({color}) => <Ionicons name={'home'} size={24} />
         }}/>
-        <Tab.Screen name={"AgentSelect"}
-                    component={AgentSelect}
-                    options={{ tabBarButton: (props) => null }} />
+        {/*<Tab.Screen name={"AgentSelect"}*/}
+        {/*            component={AgentSelect}*/}
+        {/*            options={{ tabBarButton: (props) => null }} />*/}
         <Tab.Screen name={"LiveMatch"}
                     component={LiveMatch}
                     options={{
                         tabBarIcon: ({color}) =>
-                            <Ionicons name={"game-controller-outline"}
+                            <Ionicons name={"game-controller"}
                                       size={24}
                                       color={color}/>
                     }} />

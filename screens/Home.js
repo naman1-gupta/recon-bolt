@@ -12,6 +12,13 @@ import Dropdown from "react-native-input-select";
 import {useNavigation} from "@react-navigation/native";
 import {Ionicons} from "@expo/vector-icons";
 import {Picker, Button} from 'react-native-ui-lib';
+import Animated, {
+    interpolate,
+    RotateInDownLeft,
+    useAnimatedStyle,
+    useDerivedValue,
+    useSharedValue, withTiming
+} from 'react-native-reanimated';
 
 const QUEUE_TYPES = {
     'swiftplay': 'Swiftplay',
@@ -124,26 +131,52 @@ const Home = () => {
         })
     }
 
+    // const animation = useSharedValue(0)
+    // const rotation = useDerivedValue(() => {
+    //     return interpolate(animation.value,
+    //         [0,360],
+    //         [0,360])
+    // })
+    // const animationStyle = useAnimatedStyle(() => {
+    //     return {
+    //         transform: [
+    //             {
+    //                 rotate: rotation.value + 'deg'
+    //             }
+    //         ]
+    //     }
+    // })
+    //
+    // const startAnimation = () => {
+    //     animation.value = withTiming(0, {
+    //         duration: 1000
+    //     })
+    // }
+
     return (
         <View style={styles.screen}>
             <View style={styles.partyContainer}>
                 <Text style={styles.partyTitleText}>Party</Text>
-                <Pressable onPress={refresh}>
-                    <Ionicons name={"refresh-outline"} size={24} color={'black'}/>
+                <Pressable onPress={refresh} style={({pressed}) => [pressed && styles.reduceOpacity]}>
+                    <Animated.View style={[]}>
+                        <Ionicons name={"refresh"} size={24} color={'black'} entering={RotateInDownLeft.duration(3000)}/>
+                    </Animated.View>
                 </Pressable>
             </View>
             <View>
                 <View style={styles.queueContainer}>
                     <Picker
                         containerStyle={{
+                            backgroundColor: !partyDetails?.queueId ? '#f6d9d9' : '#ccc',
                             borderColor: '#ccc',
                             borderRadius: 6,
                             borderWidth: 1,
                             flexDirection: 'row',
                             marginVertical: 16,
                             paddingVertical: 8,
-                            paddingHorizontal: 4,
+                            paddingHorizontal: 8,
                         }}
+                        editable={!!partyDetails?.queueId}
                         placeholder={partyDetails?.queueId ? "Select an option" : "Start your game"}
                         useSafeArea={true}
                         onChange={(queue) => changeQueue(queue)}
@@ -212,6 +245,9 @@ const styles = StyleSheet.create({
     currentQueueText: {
         fontSize: 24,
         fontWeight: 600,
+    },
+    reduceOpacity: {
+        opacity: 0.7
     }
 })
 

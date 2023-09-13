@@ -1,5 +1,6 @@
-const agentData = [
+export const agentData = [
     {
+        "imageSource": require("../assets/agents/gekko.png"),
         "uuid": "e370fa57-4757-3604-3648-499e1f642d3f",
         "displayName": "Gekko",
         "description": "Gekko the Angeleno leads a tight-knit crew of calamitous creatures. His buddies bound forward, scattering enemies out of the way, with Gekko chasing them down to regroup and go again.",
@@ -70,6 +71,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/fade.png"),
         "uuid": "dade69b4-4f5a-8528-247b-219e5a1facd6",
         "displayName": "Fade",
         "description": "Turkish bounty hunter Fade unleashes the power of raw nightmare to seize enemy secrets. Attuned with terror itself, she hunts down targets and reveals their deepest fears - before crushing them in the dark.",
@@ -140,6 +142,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/breach.png"),
         "uuid": "5f8d3a7f-467b-97f3-062c-13acf203c006",
         "displayName": "Breach",
         "description": "The bionic Swede Breach fires powerful, targeted kinetic blasts to aggressively clear a path through enemy ground. The damage and disruption he inflicts ensures no fight is ever fair.",
@@ -210,6 +213,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/deadlock.png"),
         "uuid": "cc8b64c8-4b25-4ff9-6e7f-37b4da43d235",
         "displayName": "Deadlock",
         "description": "Norwegian operative Deadlock deploys an array of cutting-edge nanowire to secure the battlefield from even the most lethal assault. No one escapes her vigilant watch, nor survives her unyielding ferocity.",
@@ -288,6 +292,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/raze.png"),
         "uuid": "f94c3b30-42be-e959-889c-5aa313dba261",
         "displayName": "Raze",
         "description": "Raze explodes out of Brazil with her big personality and big guns. With her blunt-force-trauma playstyle, she excels at flushing entrenched enemies and clearing tight spaces with a generous dose of \"boom.\"",
@@ -360,6 +365,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/chamber.png"),
         "uuid": "22697a3d-45bf-8dd7-4fec-84a9e28c69d7",
         "displayName": "Chamber",
         "description": "Well-dressed and well-armed, French weapons designer Chamber expels aggressors with deadly precision. He leverages his custom arsenal to hold the line and pick off enemies from afar, with a contingency built for every plan.",
@@ -430,6 +436,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/kayo.png"),
         "uuid": "601dbbe7-43ce-be57-2a40-4abd24953621",
         "displayName": "KAY/O",
         "description": "KAY/O is a machine of war built for a single purpose: neutralizing radiants. His power to Suppress enemy abilities dismantles his opponents' capacity to fight back, securing him and his allies the ultimate edge.",
@@ -500,6 +507,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/skye.png"),
         "uuid": "6f2a04ca-43e0-be17-7f36-b3908627744d",
         "displayName": "Skye",
         "description": "Hailing from Australia, Skye and her band of beasts trailblaze the way through hostile territory. With her creations hampering the enemy, and her power to heal others, the team is strongest and safest by Skye's side.",
@@ -570,6 +578,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/cypher.png"),
         "uuid": "117ed9e3-49f3-6512-3ccf-0cada7e3823b",
         "displayName": "Cypher",
         "description": "The Moroccan information broker, Cypher is a one-man surveillance network who keeps tabs on the enemy's every move. No secret is safe. No maneuver goes unseen. Cypher is always watching.",
@@ -643,6 +652,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/sova.png"),
         "uuid": "ded3520f-4264-bfed-162d-b080e2abccf9",
         "displayName": "Sova",
         "description": "Born from the eternal winter of Russia's tundra, Sova tracks, finds, and eliminates enemies with ruthless efficiency and precision. His custom bow and incredible scouting abilities ensure that even if you run, you cannot hide. ",
@@ -716,6 +726,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/sova.png"),
         "uuid": "320b2a48-4d9b-a075-30f1-1f93a9b638fa",
         "displayName": "Sova",
         "description": "Born from the eternal winter of Russia's tundra, Sova tracks, finds, and eliminates enemies with ruthless efficiency and precision. His custom bow and incredible scouting abilities ensure that even if you run, you cannot hide. ",
@@ -795,6 +806,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/killjoy.png"),
         "uuid": "1e58de9c-4950-5125-93e9-a0aee9f98746",
         "displayName": "Killjoy",
         "description": "The genius of Germany, Killjoy effortlessly secures key battlefield positions with her arsenal of inventions. If their damage doesn't take her enemies out, the debuff her robots provide will make short work of them.",
@@ -868,6 +880,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/harbor.png"),
         "uuid": "95b78ed7-4637-86d9-7e41-71ba8c293152",
         "displayName": "Harbor",
         "description": "Hailing from India’s coast, Harbor storms the field wielding ancient technology with dominion over water. He unleashes frothing rapids and crushing waves to shield his allies, or pummel those that oppose him.",
@@ -938,6 +951,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/viper.png"),
         "uuid": "707eab51-4836-f488-046a-cda6bf494859",
         "displayName": "Viper",
         "description": "The American Chemist, Viper deploys an array of poisonous chemical devices to control the battlefield and choke the enemy's vision. If the toxins don't kill her prey, her mindgames surely will.",
@@ -1016,6 +1030,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/phoenix.png"),
         "uuid": "eb93336a-449b-9c1b-0a54-a891f7921d69",
         "displayName": "Phoenix",
         "description": "Hailing from the U.K., Phoenix's star power shines through in his fighting style, igniting the battlefield with flash and flare. Whether he's got backup or not, he's rushing in to fight on his own terms.",
@@ -1095,6 +1110,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/astra.png"),
         "uuid": "41fb69c1-4189-7b37-f117-bcaf1e96f1bf",
         "displayName": "Astra",
         "description": "Ghanaian Agent Astra harnesses the energies of the cosmos to reshape battlefields to her whim. With full command of her astral form and a talent for deep strategic foresight, she's always eons ahead of her enemy's next move.",
@@ -1171,6 +1187,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/brimstone.png"),
         "uuid": "9f0d8ba9-4140-b941-57d3-a7ad57c6b417",
         "displayName": "Brimstone",
         "description": "Joining from the U.S.A., Brimstone's orbital arsenal ensures his squad always has the advantage. His ability to deliver utility precisely and safely make him the unmatched boots-on-the-ground commander.",
@@ -1244,6 +1261,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/neon.png"),
         "uuid": "bb2a4828-46eb-8cd1-e765-15848195d751",
         "displayName": "Neon",
         "description": "Filipino Agent Neon surges forward at shocking speeds, discharging bursts of bioelectric radiance as fast as her body generates it. She races ahead to catch enemies off guard then strikes them down quicker than lightning.",
@@ -1314,6 +1332,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/yoru.png"),
         "uuid": "7f94d92c-4234-0a36-9646-3a87eb8b5c89",
         "displayName": "Yoru",
         "description": "Japanese native Yoru rips holes straight through reality to infiltrate enemy lines unseen. Using deception and aggression in equal measure, he gets the drop on each target before they know where to look.",
@@ -1384,6 +1403,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/sage.png"),
         "uuid": "569fdd95-4d10-43ab-ca70-79becc718b46",
         "displayName": "Sage",
         "description": "The bastion of China, Sage creates safety for herself and her team wherever she goes. Able to revive fallen friends and stave off forceful assaults, she provides a calm center to a hellish battlefield.",
@@ -1457,6 +1477,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/reyna.png"),
         "uuid": "a3bfb853-43b2-7238-a4f1-ad90e9e46bcc",
         "displayName": "Reyna",
         "description": "Forged in the heart of Mexico, Reyna dominates single combat, popping off with each kill she scores. Her capability is only limited by her raw skill, making her sharply dependant on performance. ",
@@ -1530,6 +1551,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/omen.png"),
         "uuid": "8e253930-4c05-31dd-1b6c-968525494517",
         "displayName": "Omen",
         "description": "A phantom of a memory, Omen hunts in the shadows. He renders enemies blind, teleports across the field, then lets paranoia take hold as his foe scrambles to uncover where he might strike next.",
@@ -1603,6 +1625,7 @@ const agentData = [
         }
     },
     {
+        "imageSource": require("../assets/agents/jett.png"),
         "uuid": "add6443a-41bd-e414-f6ad-e58d267f4e95",
         "displayName": "Jett",
         "description": "Representing her home country of South Korea, Jett's agile and evasive fighting style lets her take risks no one else can. She runs circles around every skirmish, cutting enemies up before they even know what hit them.",
@@ -1682,7 +1705,3 @@ const agentData = [
         }
     }
 ]
-
-module.exports = {
-    agentData
-}

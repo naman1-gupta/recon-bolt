@@ -3327,6 +3327,14 @@ expo-status-bar@~1.6.0:
   resolved "https://registry.yarnpkg.com/expo-status-bar/-/expo-status-bar-1.6.0.tgz#e79ffdb9a84d2e0ec9a0dc7392d9ab364fefa9cf"
   integrity sha512-e//Oi2WPdomMlMDD3skE4+1ZarKCJ/suvcB4Jo/nO427niKug5oppcPNYO+csR6y3ZglGuypS+3pp/hJ+Xp6fQ==
 
+expo-system-ui@~2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/expo-system-ui/-/expo-system-ui-2.4.0.tgz#bf809172726cf661ab4f526129eb427bb5f6e4d4"
+  integrity sha512-uaBAYeQtFzyE8WVcch2V3G243xvOf7vJkLzrIJ3rJ8NA3uZRmxF0lMMe75oMrAaLVXyr1Z+ZE6UZwh7x49FuIg==
+  dependencies:
+    "@react-native/normalize-color" "^2.0.0"
+    debug "^4.3.2"
+
 expo@^49.0.8:
   version "49.0.9"
   resolved "https://registry.yarnpkg.com/expo/-/expo-49.0.9.tgz#b66e66b411b559a720184ffd1512987cd8b18028"
@@ -5659,11 +5667,6 @@ react-native-gesture-handler@~2.12.0:
     invariant "^2.2.4"
     lodash "^4.17.21"
     prop-types "^15.7.2"
-
-react-native-input-select@^1.1.9:
-  version "1.1.9"
-  resolved "https://registry.yarnpkg.com/react-native-input-select/-/react-native-input-select-1.1.9.tgz#adc64845df41d0f4af212d0c8bcabcfbbccc0b92"
-  integrity sha512-7NK552xSojv408lNseN0G8XAgx8fl0xuJq9jA2h3IAiq48H6IO6Fy7ZTe7iN8xNxDqCJ9TTvsSxMBtL6FocNsg==
 
 react-native-reanimated@~3.3.0:
   version "3.3.0"

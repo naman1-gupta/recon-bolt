@@ -1,13 +1,14 @@
-import {StatusBar, FlatList, Image, Text, View, Pressable, StyleSheet, Dimensions} from 'react-native';
+import {StatusBar, FlatList, Image, View, Pressable, StyleSheet, Dimensions} from 'react-native';
 import {agentData} from "../data/agent-data";
 import {lockAgent, hoverAgent, getCoreGamePlayerStatus} from "../utils/game";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {useNavigation} from "@react-navigation/native";
 import Button from 'react-native-ui-lib/button'
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
     const [agent, selectAgent] = useState(null)
+
 
     const matchId = route.params?.matchId
 
@@ -48,17 +49,15 @@ function AgentSelect({route, navigation}) {
                                   <Pressable onPress={() => onAgentSelected(item.item.uuid)}>
                                       <View
                                           style={[styles.agent, item.item.uuid === agent ? styles.agentSelected : null]}>
-                                          <Image style={styles.agentIcon} source={{
-                                              src: require(`assets/agents/${item.item.displayIconSmall.toLowerCase()}`)
-                                          }}
-                                                 resizeMode={"contain"}/>
+                                          <Image style={styles.agentIcon}
+                                                 source={item.item.imageSource}/>
                                       </View>
                                   </Pressable>
                               )
                           }}/>
             </View>
             <View>
-                <Button title={"Confirm"} onPress={onAgentLocked} disabled={!agent}/>
+                <Button label={"Confirm"} onPress={onAgentLocked} disabled={!agent}/>
             </View>
         </View>
     )
@@ -75,17 +74,22 @@ const styles = StyleSheet.create({
         maxHeight: 350
     },
     agent: {
+        flexDirection: 'column',
         margin: 2,
         width: 50,
         height: 50,
+        borderWidth: 1,
         borderColor: 'black',
     },
     agentIcon: {
+        resizeMode: 'contain',
+        width: 50,
+        height: 50,
         flex: 1,
     },
     agentSelected: {
         borderColor: 'red',
-        borderWidth: 1,
+        borderWidth: 2,
     },
     agentText: {
         textAlign: 'center',

@@ -9,7 +9,6 @@ const LiveMatch = () => {
     const [matchDetails, setMatchDetails] = useState({})
     const matchId = route.params?.matchId;
     const getGameDetails = () => {
-        // getCurrentGameDetails(matchId)
         getMatchDetails(matchId).then(response => setMatchDetails(response))
     }
 
