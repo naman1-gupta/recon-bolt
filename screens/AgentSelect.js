@@ -1,8 +1,9 @@
-import {StatusBar, FlatList, Image, Text, View, Pressable, StyleSheet, Button, Dimensions} from 'react-native';
+import {StatusBar, FlatList, Image, Text, View, Pressable, StyleSheet, Dimensions} from 'react-native';
 import {agentData} from "../data/agent-data";
 import {lockAgent, hoverAgent, getCoreGamePlayerStatus} from "../utils/game";
 import {useEffect, useState} from "react";
 import {useNavigation} from "@react-navigation/native";
+import Button from 'react-native-ui-lib/button'
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -41,15 +42,20 @@ function AgentSelect({route, navigation}) {
     return (
         <View style={styles.mainScreen}>
             <View>
-                <FlatList extraData={agent} style={styles.agentList} numColumns={cols} data={playableCharacters} renderItem={(item) => {
-                    return (
-                        <Pressable onPress={() => onAgentSelected(item.item.uuid)}>
-                            <View style={[styles.agent, item.item.uuid === agent ? styles.agentSelected : null]}>
-                                <Image style={styles.agentIcon} source={{uri: item.item.displayIconSmall}} resizeMode={"contain"}/>
-                            </View>
-                        </Pressable>
-                    )
-                }} />
+                <FlatList extraData={agent} style={styles.agentList} numColumns={cols} data={playableCharacters}
+                          renderItem={(item) => {
+                              return (
+                                  <Pressable onPress={() => onAgentSelected(item.item.uuid)}>
+                                      <View
+                                          style={[styles.agent, item.item.uuid === agent ? styles.agentSelected : null]}>
+                                          <Image style={styles.agentIcon} source={{
+                                              src: require(`assets/agents/${item.item.displayIconSmall.toLowerCase()}`)
+                                          }}
+                                                 resizeMode={"contain"}/>
+                                      </View>
+                                  </Pressable>
+                              )
+                          }}/>
             </View>
             <View>
                 <Button title={"Confirm"} onPress={onAgentLocked} disabled={!agent}/>

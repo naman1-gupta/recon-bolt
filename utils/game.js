@@ -9,7 +9,7 @@ import {agentData} from "../data/agent-data";
 const riotClient = axios.create({
     headers: {
         'x-riot-clientplatform': RIOTCLIENT_PLATFORM,
-        'x-riot-clientversion':'release-07.05-shipping-4-974204',
+        'x-riot-clientversion': 'release-07.05-shipping-4-974204',
         'accept': '*/*',
         'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8'
     },
@@ -62,6 +62,7 @@ const SERVICE_URLS = [
     "SERVICEURL_COREGAME",
     "SERVICEURL_ESPORTS"
 ]
+
 export async function getConfig() {
     return new Promise(async (resolve, reject) => {
         const auth = JSON.parse(await AsyncStorage.getItem("auth"))
@@ -72,17 +73,15 @@ export async function getConfig() {
         const config = {
             url: `https://shared.${geo.affinities.live}.a.pvp.net/v1/config/ap`,
             method: 'get',
-            headers: {
-
-            }
+            headers: {}
         }
 
         axios.request(config).then((response) => {
             console.log("Configs", response.data)
             const promises = []
             Object.keys(response.data['Collapsed']).forEach((k) => {
-                if(k.startsWith("SERVICEURL")) {
-                  promises.push(AsyncStorage.setItem(k, response.data['Collapsed'][k]))
+                if (k.startsWith("SERVICEURL")) {
+                    promises.push(AsyncStorage.setItem(k, response.data['Collapsed'][k]))
                 }
             })
 
@@ -117,11 +116,10 @@ export async function getPlayerPartyId(playerId) {
             resolve(response.data["CurrentPartyID"])
         }).catch((err) => {
             console.log("Error fetching party details", err)
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 console.log("resolving with empty value")
                 resolve('')
-            }
-            else {
+            } else {
                 reject(err.response.status)
             }
         })
@@ -153,10 +151,9 @@ export async function getPartyDetails(partyId) {
 
             resolve(partyDetails)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -190,10 +187,9 @@ export async function switchQueue(queueType, partyId) {
 
             resolve(partyDetails)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -226,10 +222,9 @@ export async function startMatchmaking(partyId) {
 
             resolve(partyDetails)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -258,10 +253,9 @@ export async function getPreGamePlayerStatus(playerId) {
             resolve(matchDetails)
         }).catch((err) => {
             console.log("Error getting pregame status", err)
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -289,10 +283,9 @@ export async function getCoreGamePlayerStatus(playerId) {
             matchDetails.matchId = response.data["MatchID"]
             resolve(matchDetails)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -317,10 +310,9 @@ export async function getPreGameMatchStatus(matchId) {
             console.log("matchStatus", response.data)
             resolve(response.data)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -344,10 +336,9 @@ export async function hoverAgent(agentId, matchId) {
         riotClient.request(config).then((response) => {
             resolve(response.data)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 console.log("Error selecting agent", err)
                 reject(err.response.status)
             }
@@ -372,10 +363,9 @@ export async function lockAgent(agentId, matchId) {
         riotClient.request(config).then((response) => {
             resolve(response.data)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 console.log("Error locking agent", err)
                 reject(err.response.status)
             }

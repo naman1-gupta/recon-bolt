@@ -1,4 +1,4 @@
-export const agentData = [
+const agentData = [
     {
         "uuid": "e370fa57-4757-3604-3648-499e1f642d3f",
         "displayName": "Gekko",
@@ -1682,3 +1682,7 @@ export const agentData = [
         }
     }
 ]
+
+module.exports = {
+    agentData
+}

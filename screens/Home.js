@@ -1,4 +1,4 @@
-import {StyleSheet, View, Text, Alert, TextInput, Button, Pressable} from "react-native";
+import {StyleSheet, View, Text, Pressable} from "react-native";
 import {useEffect, useState} from "react";
 import {
     getConfig,
@@ -11,6 +11,7 @@ import {
 import Dropdown from "react-native-input-select";
 import {useNavigation} from "@react-navigation/native";
 import {Ionicons} from "@expo/vector-icons";
+import {Picker, Button} from 'react-native-ui-lib';
 
 const QUEUE_TYPES = {
     'swiftplay': 'Swiftplay',
@@ -133,22 +134,30 @@ const Home = () => {
             </View>
             <View>
                 <View style={styles.queueContainer}>
-                    <Dropdown
-                        label="Change queue"
-                        placeholder={partyDetails.queueId ? "Select an option..." : "(Disabled) Start your game"}
-                        options={[
-                            {label: 'Swiftplay', value: 'swiftplay'},
-                            {label: 'Competitive', value: 'competitive'},
-                            {label: 'Unrated', value: 'unrated'},
-                            {label: 'Spike Rush', value: 'spikerush'},
-                            {label: 'Escalation', value: 'ggteam'},
-                            {label: 'Team Deathmatch', value: 'hurm'},
-                            {label: 'Deathmatch', value: 'deathmatch'}
-                        ]}
-                        selectedValue={partyDetails?.queueId}
-                        onValueChange={(value) => changeQueue(value)}
-                        disabled={true}
-                    />
+                    <Picker
+                        containerStyle={{
+                            borderColor: '#ccc',
+                            borderRadius: 6,
+                            borderWidth: 1,
+                            flexDirection: 'row',
+                            marginVertical: 16,
+                            paddingVertical: 8,
+                            paddingHorizontal: 4,
+                        }}
+                        placeholder={partyDetails?.queueId ? "Select an option" : "Start your game"}
+                        useSafeArea={true}
+                        onChange={(queue) => changeQueue(queue)}
+                        value={partyDetails?.queueId}
+                        >
+                        {
+                            Object.keys(QUEUE_TYPES)
+                            .map(queue => <Picker.Item
+                                value={queue}
+                                label={QUEUE_TYPES[queue]}
+                                key={queue}
+                            />)
+                        }
+                    </Picker>
                     <View style={{minHeight: 40, flexDirection: 'row', alignItems: 'center'}}>
                         {
                             partyDetails.queueId !== null ? (
@@ -162,10 +171,10 @@ const Home = () => {
 
                 </View>
                 {
-                    partyDetails.state !== "MATCHMAKING" && <Button title={`Start matchmaking`} onPress={queueMatch}/>
+                    partyDetails.state !== "MATCHMAKING" && <Button label={`Start matchmaking`} onPress={queueMatch}/>
                 }
                 {
-                    partyDetails.state === "MATCHMAKING" && <Button title={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>
+                    partyDetails.state === "MATCHMAKING" && <Button label={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>
                 }
 
             </View>

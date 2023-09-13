@@ -1,4 +1,4 @@
-import { StatusBar } from 'expo-status-bar';
+import {StatusBar} from 'expo-status-bar';
 import {Button, StyleSheet, Text, View, Alert} from 'react-native';
 import {getEntitlementsToken, getGeoInfo, getUserInfo, login, testProxy} from "./utils/login";
 import {useContext, useEffect, useState} from "react";
@@ -29,7 +29,7 @@ const Root = () => {
     useEffect(() => {
         async function getToken() {
             const storedToken = await AsyncStorage.getItem("auth")
-            if(storedToken) {
+            if (storedToken) {
                 console.log("Stored Token", storedToken)
                 authContext.authenticate(JSON.parse(storedToken));
             }
@@ -46,15 +46,15 @@ const Root = () => {
 
     return (
         <NavigationContainer>
-            {authContext.auth.access_token && <AuthenticatedStack />}
-            {!authContext.auth.access_token && <UnAuthenticatedStack />}
+            {authContext.auth.access_token && <AuthenticatedStack/>}
+            {!authContext.auth.access_token && <UnAuthenticatedStack/>}
         </NavigationContainer>
     )
 }
 
 const UnAuthenticatedStack = () => {
     return <Tab.Navigator>
-        <Tab.Screen name={"Login"} component={Login} />
+        <Tab.Screen name={"Login"} component={Login}/>
     </Tab.Navigator>
 }
 
@@ -67,12 +67,13 @@ const AuthenticatedStack = () => {
         headerLeftContainerStyle: {
             paddingHorizontal: 8,
         },
-        headerLeft: ({tintColor}) => <Ionicons  name={'document'} size={24} color={tintColor}
-                                                       onPress={() => {
-                                                           console.log(authContext.geo);
-                                                           console.log(authContext.auth)
-                                                       }}/>,
-        headerRight: ({tintColor}) => <Ionicons name={'log-out'} color={tintColor} size={24} onPress={authContext.logout}/>
+        headerLeft: ({tintColor}) => <Ionicons name={'document'} size={24} color={tintColor}
+                                               onPress={() => {
+                                                   console.log(authContext.geo);
+                                                   console.log(authContext.auth)
+                                               }}/>,
+        headerRight: ({tintColor}) => <Ionicons name={'log-out'} color={tintColor} size={24}
+                                                onPress={authContext.logout}/>
     }}>
         <Tab.Screen name={"Home"} component={Home} options={{
             tabBarIcon: ({color}) => <Ionicons name={'home-outline'} size={24} />
@@ -93,6 +94,7 @@ const AuthenticatedStack = () => {
 
 function Login() {
     const authContext = useContext(AuthContext)
+
     async function performLogin() {
         console.log("performing login...")
         try {
@@ -116,27 +118,19 @@ function Login() {
         }
     }
 
-    const akmsdkmasm = () => {
-        testProxy()
-            .then(response => console.log("page response", response))
-            .catch(err => console.log("errorrrr getting page", err))
-    }
-
 
     return (
         <View style={styles.container}>
-            <Button title={"Login"} onPress={performLogin} />
-            {/*<Button title={"Login"} onPress={akmsdkmasm} />*/}
+            <Button title={"Login"} onPress={performLogin}/>
         </View>
     )
 }
 
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    container: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
