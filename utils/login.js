@@ -76,8 +76,8 @@ export async function login() {
 
                 axios.request(config)
                     .then((response) => {
-                        console.log('Second request response', response)
-                        return resolve(JSON.parse(response.data))
+                        console.log('Second request response', response.data)
+                        return resolve(response.data)
                     })
                     .catch((error) => {
                         console.log("Second request failed", error);

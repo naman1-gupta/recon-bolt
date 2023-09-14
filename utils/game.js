@@ -400,10 +400,9 @@ export async function leaveMatchmaking(partyId) {
             resolve(partyDetails)
         }).catch((err) => {
             console.log("leave matchmaking err", err)
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -439,10 +438,9 @@ export async function getCurrentGameDetails(matchId) {
                 resolve({})
             })
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -469,10 +467,9 @@ export async function getMatchDetails(matchId) {
             console.log("MatchDetails", JSON.stringify(response.data, null, 4))
             resolve(response.data)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
@@ -496,13 +493,38 @@ export async function getPlayerMMR(playerId) {
         riotClient.request(config).then((response) => {
             resolve(response.data)
         }).catch((err) => {
-            if(err.response.status === 404){
+            if (err.response.status === 404) {
                 resolve({})
-            }
-            else{
+            } else {
                 reject(err.response.status)
             }
         })
     })
 
+}
+
+export async function getPlayerEntitlements(playerId) {
+    const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_STORE")
+    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+
+    return new Promise((resolve, reject) => {
+        const config = {
+            url: `${SERVICE_URL}/store/v1/entitlements/${PLAYER_ID}`,
+            method: 'get',
+            headers: {
+                'authorization': `Bearer ${auth.access_token}`,
+                'x-riot-entitlements-jwt': auth.entitlements_token,
+            }
+        }
+
+        riotClient.request(config).then((response) => {
+            resolve(response.data)
+        }).catch((err) => {
+            if (err.response.status === 404) {
+                resolve({})
+            } else {
+                reject(err.response.status)
+            }
+        })
+    })
 }

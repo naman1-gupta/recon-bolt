@@ -8,7 +8,6 @@ import {
     getPreGamePlayerStatus, leaveMatchmaking, startMatchmaking,
     switchQueue
 } from "../utils/game";
-import Dropdown from "react-native-input-select";
 import {useNavigation} from "@react-navigation/native";
 import {Ionicons} from "@expo/vector-icons";
 import {Picker, Button} from 'react-native-ui-lib';
@@ -19,6 +18,8 @@ import Animated, {
     useDerivedValue,
     useSharedValue, withTiming
 } from 'react-native-reanimated';
+
+import Colors from "../constants/Colors";
 
 const QUEUE_TYPES = {
     'swiftplay': 'Swiftplay',
@@ -159,7 +160,7 @@ const Home = () => {
                 <Text style={styles.partyTitleText}>Party</Text>
                 <Pressable onPress={refresh} style={({pressed}) => [pressed && styles.reduceOpacity]}>
                     <Animated.View style={[]}>
-                        <Ionicons name={"refresh"} size={24} color={'black'} entering={RotateInDownLeft.duration(3000)}/>
+                        <Ionicons name={"refresh"} size={24} color={'white'} entering={RotateInDownLeft.duration(3000)}/>
                     </Animated.View>
                 </Pressable>
             </View>
@@ -221,6 +222,7 @@ const Home = () => {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
+        backgroundColor: Colors.darkBlueBg,
         alignContent: 'center',
         paddingHorizontal: 12,
         paddingVertical: 16,
@@ -230,6 +232,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between"
     },
     partyTitleText: {
+        color: '#ccc',
         fontSize: 36,
         fontWeight: "bold",
     },
@@ -237,12 +240,14 @@ const styles = StyleSheet.create({
         paddingTop: 12
     },
     currentQueueLabel: {
+        color: '#ccc',
         marginRight: 24,
         fontSize: 16,
         fontWeight: 200,
         minHeight: 10
     },
     currentQueueText: {
+        color: '#ccc',
         fontSize: 24,
         fontWeight: 600,
     },

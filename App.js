@@ -10,12 +10,15 @@ import Home from "./screens/Home";
 import {Ionicons} from '@expo/vector-icons';
 import AgentSelect from "./screens/AgentSelect";
 import LiveMatch from "./screens/LiveMatch";
+import Colors from "./constants/Colors";
+import Login from './screens/Login';
 
 
 const Tab = createBottomTabNavigator();
 export default function App() {
   return (
       <>
+          <StatusBar style={"light"}/>
           <AuthContextProvider>
               <Root />
           </AuthContextProvider>
@@ -52,8 +55,26 @@ const Root = () => {
     )
 }
 
+const commonNavigatorStyles = {
+    headerRightContainerStyle: {
+        paddingHorizontal: 8,
+    },
+    headerLeftContainerStyle: {
+        paddingHorizontal: 8,
+    },
+    tabBarActiveTintColor: 'yellow',
+    tabBarInactiveTintColor: Colors.darkBlueBg,
+    headerTitleStyle: {
+        color: '#ccc'
+    },
+    headerStyle: {
+        backgroundColor: Colors.darkBlueBg,
+    },
+    headerTintColor: '#ccc',
+}
+
 const UnAuthenticatedStack = () => {
-    return <Tab.Navigator>
+    return <Tab.Navigator screenOptions={{...commonNavigatorStyles}}>
         <Tab.Screen name={"Login"} component={Login}/>
     </Tab.Navigator>
 }
@@ -61,26 +82,25 @@ const UnAuthenticatedStack = () => {
 const AuthenticatedStack = () => {
     const authContext = useContext(AuthContext)
     return <Tab.Navigator screenOptions={{
-        headerRightContainerStyle: {
-            paddingHorizontal: 8,
-        },
-        headerLeftContainerStyle: {
-            paddingHorizontal: 8,
-        },
+        ...commonNavigatorStyles,
         headerLeft: ({tintColor}) => <Ionicons name={'document'} size={24} color={tintColor}
                                                onPress={() => {
                                                    console.log(authContext.geo);
                                                    console.log(authContext.auth)
                                                }}/>,
         headerRight: ({tintColor}) => <Ionicons name={'log-out'} color={tintColor} size={24}
-                                                onPress={authContext.logout}/>
+                                                onPress={authContext.logout}/>,
+        tabBarStyle:  {
+            backgroundColor: Colors.darkBlueBg,
+            borderColor: 'yellow'
+        }
     }}>
         <Tab.Screen name={"Home"} component={Home} options={{
-            tabBarIcon: ({color}) => <Ionicons name={'home'} size={24} />
+            tabBarIcon: ({color}) => <Ionicons name={'home'} color={color} size={24} />
         }}/>
-        {/*<Tab.Screen name={"AgentSelect"}*/}
-        {/*            component={AgentSelect}*/}
-        {/*            options={{ tabBarButton: (props) => null }} />*/}
+        <Tab.Screen name={"AgentSelect"}
+                    component={AgentSelect}
+                    options={{ tabBarButton: (props) => null }} />
         <Tab.Screen name={"LiveMatch"}
                     component={LiveMatch}
                     options={{
@@ -92,43 +112,10 @@ const AuthenticatedStack = () => {
     </Tab.Navigator>
 }
 
-function Login() {
-    const authContext = useContext(AuthContext)
-
-    async function performLogin() {
-        console.log("performing login...")
-        try {
-            let res = await login()
-            console.log("getting user info")
-            let userinfo = await getUserInfo(res.access_token)
-            let entitlements_token = await getEntitlementsToken(res.access_token)
-            let geoInfo = await getGeoInfo(res.access_token, res.id_token)
-
-            console.log(entitlements_token)
-
-            authContext.authenticate({
-                access_token: res.access_token,
-                id_token: res.id_token,
-                entitlements_token: entitlements_token,
-            })
-
-            authContext.setGeo(geoInfo)
-        } catch {
-            Alert.alert("There was an error logging in...")
-        }
-    }
-
-
-    return (
-        <View style={styles.container}>
-            <Button title={"Login"} onPress={performLogin}/>
-        </View>
-    )
-}
-
 
 const styles = StyleSheet.create({
     container: {
+        backgroundColor: Colors.darkBlueBg,
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
