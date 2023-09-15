@@ -1,10 +1,9 @@
-import {StatusBar, FlatList, Image, View, Pressable, StyleSheet, Dimensions} from 'react-native';
+import {Dimensions, FlatList, Image, Pressable, StyleSheet, View} from 'react-native';
 import {agentData} from "../data/agent-data";
-import {lockAgent, hoverAgent, getCoreGamePlayerStatus, getPlayerEntitlements} from "../utils/game";
+import {getCoreGamePlayerStatus, getPlayerEntitlements, hoverAgent, lockAgent} from "../utils/game";
 import {useEffect, useState} from "react";
-import {useNavigation} from "@react-navigation/native";
 import Button from 'react-native-ui-lib/button'
-import {getEntitlementsToken} from "../utils/login";
+import Colors from "../constants/Colors";
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -17,25 +16,24 @@ function AgentSelect({route, navigation}) {
         "9f0d8ba9-4140-b941-57d3-a7ad57c6b417", //brimstone
         "eb93336a-449b-9c1b-0a54-a891f7921d69", //phoenix
     ]
-    const [unlockedCharacters, setUnlockedCharacters] = useState([])
     const PLAYER_ITEM_TYPE_ID = '01bb38e1-da47-4e6a-9b3d-945fe4655707'
     const [playableAgents, setPlayableAgents] = useState([])
-
-
+    const [unlockedCharacterIDs, setUnlockedCharacterIDs] = useState([])
+    const [agentLocked, setAgentLocked] = useState(false)
 
     const matchId = route.params?.matchId
 
     useEffect(() => {
         getPlayerEntitlements().then(response => {
-            const playerUnlockedCharacters = response['EntitlementsByTypes']
+            const charsUnlockedWithContracts = response['EntitlementsByTypes']
                 .filter(entitlementType => entitlementType["ItemTypeID"] === PLAYER_ITEM_TYPE_ID)[0].Entitlements
                 .map(entitlement => entitlement.ItemID)
-            const unlockedCharacterIDs = playerUnlockedCharacters.concat(DEFAULT_CHARACTERS)
-            setUnlockedCharacters(unlockedCharacterIDs)
+            const unlockedCharacterIDs = charsUnlockedWithContracts.concat(DEFAULT_CHARACTERS)
+            setUnlockedCharacterIDs(unlockedCharacterIDs)
 
-            const unlockedAgents = agentData.filter(agent => unlockedCharacterIDs.includes(agent.uuid))
+            const unlockedAgents = agentData.filter(agent => agent.isPlayableCharacter && unlockedCharacterIDs.includes(agent.uuid))
             const sortedUnlockedAgents = unlockedAgents.sort((a, b) => a.displayName.localeCompare(b.displayName))
-            const unlockedPlayableAgents = [...sortedUnlockedAgents, ...agentData.filter(a => a.isPlayableCharacter).filter(a => !unlockedCharacterIDs.includes(a.uuid))]
+            const unlockedPlayableAgents = [...sortedUnlockedAgents, ...playableCharacters.filter(a => !unlockedCharacterIDs.includes(a.uuid))]
 
             setPlayableAgents(unlockedPlayableAgents)
             setIsLoading(false)
@@ -43,6 +41,9 @@ function AgentSelect({route, navigation}) {
     }, []);
 
     const onAgentSelected = (agentId) => {
+        if (!unlockedCharacterIDs.includes(agentId)) {
+            return
+        }
         console.log("Selected agent id", agentId, matchId);
         selectAgent(agentId)
         hoverAgent(agentId, matchId)
@@ -53,8 +54,8 @@ function AgentSelect({route, navigation}) {
     }
 
     const onAgentLocked = () => {
-        console.log("agent selected", agent, matchId)
         lockAgent(agent, matchId).then(response => {
+            setAgentLocked(true)
             const timer = setInterval(() => {
                 getCoreGamePlayerStatus().then(response => {
                     clearInterval(timer)
@@ -74,26 +75,24 @@ function AgentSelect({route, navigation}) {
         <View style={styles.mainScreen}>
             <View>
                 <FlatList extraData={agent} style={styles.agentList} numColumns={cols} data={playableAgents}
-                          renderItem={(item) => {
+                          renderItem={({item}) => {
                               return (
-                                  unlockedCharacters.includes(item.item.uuid) ?
-                                      <Pressable onPress={() => onAgentSelected(item.item.uuid)}>
-                                          <View
-                                              style={[styles.agent, item.item.uuid === agent ? styles.agentSelected : null]}>
-                                              <Image style={styles.agentIcon}
-                                                     source={item.item.imageSource}/>
-                                          </View>
-                                      </Pressable> :
+                                  <Pressable onPress={onAgentSelected.bind(this, item.uuid)}>
                                       <View
-                                          style={[styles.agent, styles.agentDisabled, item.item.uuid === agent ? styles.agentSelected : null]}>
+                                          style={[
+                                              styles.agent,
+                                              unlockedCharacterIDs.includes(item.uuid) ? null : styles.agentDisabled,
+                                              item.uuid === agent ? styles.agentSelected : null
+                                          ]}>
                                           <Image style={styles.agentIcon}
-                                                 source={item.item.imageSource}/>
+                                                 source={item.imageSource}/>
                                       </View>
+                                  </Pressable>
                               )
                           }}/>
             </View>
             <View>
-                <Button label={"Confirm"} onPress={onAgentLocked} disabled={!agent}/>
+                <Button label={"Confirm"} onPress={onAgentLocked} disabled={agentLocked}/>
             </View>
         </View>
     )
@@ -105,6 +104,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         paddingHorizontal: 16,
+        backgroundColor: Colors.darkBlueBg,
     },
     agentList: {
         maxHeight: 350

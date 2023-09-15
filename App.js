@@ -62,8 +62,8 @@ const commonNavigatorStyles = {
     headerLeftContainerStyle: {
         paddingHorizontal: 8,
     },
-    tabBarActiveTintColor: 'yellow',
-    tabBarInactiveTintColor: Colors.darkBlueBg,
+    tabBarActiveTintColor: '#f5bf0d',
+    tabBarInactiveTintColor: '#6b5303',
     headerTitleStyle: {
         color: '#ccc'
     },
@@ -71,11 +71,17 @@ const commonNavigatorStyles = {
         backgroundColor: Colors.darkBlueBg,
     },
     headerTintColor: '#ccc',
+    tabBarStyle:  {
+        backgroundColor: Colors.darkBlueBg,
+        borderColor: 'yellow'
+    }
 }
 
 const UnAuthenticatedStack = () => {
     return <Tab.Navigator screenOptions={{...commonNavigatorStyles}}>
-        <Tab.Screen name={"Login"} component={Login}/>
+        <Tab.Screen name={"Login"} component={Login} options={{
+            tabBarIcon: ({color}) => <Ionicons name={'log-in'} color={color} size={24}/>
+        }}/>
     </Tab.Navigator>
 }
 
@@ -89,11 +95,7 @@ const AuthenticatedStack = () => {
                                                    console.log(authContext.auth)
                                                }}/>,
         headerRight: ({tintColor}) => <Ionicons name={'log-out'} color={tintColor} size={24}
-                                                onPress={authContext.logout}/>,
-        tabBarStyle:  {
-            backgroundColor: Colors.darkBlueBg,
-            borderColor: 'yellow'
-        }
+                                                onPress={authContext.logout}/>
     }}>
         <Tab.Screen name={"Home"} component={Home} options={{
             tabBarIcon: ({color}) => <Ionicons name={'home'} color={color} size={24} />

@@ -1,9 +1,9 @@
 import {useContext, useState} from "react";
 import {AuthContext} from "../store/Auth";
 import {getEntitlementsToken, getGeoInfo, getUserInfo, login} from "../utils/login";
-import {Alert, Button, KeyboardAvoidingView, StyleSheet, View} from "react-native";
+import {Alert, KeyboardAvoidingView, StyleSheet, View} from "react-native";
 import Colors from "../constants/Colors";
-import {TextField} from 'react-native-ui-lib'
+import {Button, Image, TextField} from 'react-native-ui-lib'
 
 function Login() {
     const authContext = useContext(AuthContext)
@@ -13,7 +13,7 @@ function Login() {
     async function performLogin() {
         console.log("performing login...")
         try {
-            let res = await login()
+            let res = await login(email, password)
             console.log("getting user info")
             let userinfo = await getUserInfo(res.access_token)
             let entitlements_token = await getEntitlementsToken(res.access_token)
@@ -42,40 +42,67 @@ function Login() {
         }
     }
 
-
     return (
         <KeyboardAvoidingView style={styles.container}>
-            <View>
-                <TextField placeholder={'email'}
-                           style={{borderColor: '#ccc', borderWidth: 1}}
-                           onChangeText={onChangeText.bind(this, "email")}
-                           enableErrors
-                           validate={['required', 'email', (value) => value.length > 6]}
-                           validationMessage={['Field is required', 'Email is invalid', 'Password is too short']}
-                />
-            </View>
-            <View>
-                <TextField placeholder={'password'}
-                           onChangeText={onChangeText.bind(this, "password")}
-                           style={{borderColor: '#ccc', borderWidth: 1}}
-                           enableErrors
-                           textContentType={"password"}
-                           validate={['required', (value) => value.length > 6]}
-                           validationMessage={['Field is required', 'Password is too short']}
-                           />
+            <Image
+                source={{uri: 'https://w7.pngwing.com/pngs/708/311/png-transparent-icon-logo-twitter-logo-twitter-logo-blue-social-media-area.png'}}
+                resizeMode={'cover'} width={100} height={100}/>
+            <View style={{width: '100%'}}>
+                <View style={{height: 50, width: '100%', borderRadius: 100}}>
+                    <TextField placeholder={'Enter your email'}
+                               placeholderTextColor={'#ccc'}
+                               color={Colors.activeGoldTint}
+                               autoCapitalize={"none"}
+                               style={{
+                                   padding: 16,
+                                   height: '100%',
+                                   borderColor: '#ccc',
+                                   borderWidth: 1,
+                                   borderRadius: 100
+                               }}
+                               onChangeText={onChangeText.bind(this, "email")}
+                               enableErrors
+                               validate={['required', 'email', (value) => value.length > 6]}
+                               validationMessage={['Field is required', 'Email is invalid', 'Password is too short']}
+                    />
+                </View>
+                <View style={{height: 50, width: '100%', borderRadius: 100, marginVertical: 24}}>
+                    <TextField placeholder={'Enter your password'}
+                               color={Colors.activeGoldTint}
+                               onChangeText={onChangeText.bind(this, "password")}
+                               placeholderTextColor={'#ccc'}
+                               autoCapitalize={"none"}
+                               secureTextEntry
+                               style={{
+                                   padding: 16,
+                                   height: '100%',
+                                   borderColor: '#ccc',
+                                   borderWidth: 1,
+                                   borderRadius: 100
+                               }}
+                               enableErrors
+                               textContentType={"password"}
+                               validate={['required', (value) => value.length > 6]}
+                               validationMessage={['Field is required', 'Password is too short']}
+                    />
+                </View>
+
+                <Button style={{marginTop: 8, width: '100%'}} label={"Login"} onPress={performLogin}
+                        disabled={!email || !password}/>
             </View>
 
-            <Button title={"Login"} onPress={performLogin}/>
         </KeyboardAvoidingView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
+        paddingHorizontal: 24,
         backgroundColor: Colors.darkBlueBg,
         flex: 1,
+        justifyContent: "space-evenly",
         alignItems: 'center',
-        justifyContent: 'center',
+        padding: 16,
     }
 })
 

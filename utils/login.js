@@ -8,7 +8,7 @@ const USERINFO = 'https://auth.riotgames.com/userinfo'
 const ENTITLEMENTS_API = 'https://entitlements.auth.riotgames.com/api/token/v1'
 const GEO_API = 'https://riot-geo.pas.si.riotgames.com/pas/v1/product/valorant'
 
-export async function login() {
+export async function login(username, password) {
     return new Promise((resolve, reject) => {
         let data = JSON.stringify({
             "client_id": "play-valorant-web-prod",
@@ -54,8 +54,8 @@ export async function login() {
                 }
 
                 data = JSON.stringify({
-                    "username": "v0gonpoet",
-                    "password": PASSWORD,
+                    "username": username,
+                    "password": password,
                     "remember": true,
                     "type": "auth"
                 });
