@@ -4,11 +4,15 @@ import {getEntitlementsToken, getGeoInfo, getUserInfo, login} from "../utils/log
 import {Alert, KeyboardAvoidingView, StyleSheet, View} from "react-native";
 import Colors from "../constants/Colors";
 import {Button, Image, TextField} from 'react-native-ui-lib'
+import {useHeaderHeight} from '@react-navigation/elements';
+import {head} from "axios";
 
 function Login() {
     const authContext = useContext(AuthContext)
     const [password, setPassword] = useState('')
     const [email, setEmail] = useState('')
+
+    const height = useHeaderHeight()
 
     async function performLogin() {
         console.log("performing login...")
@@ -43,7 +47,7 @@ function Login() {
     }
 
     return (
-        <KeyboardAvoidingView style={styles.container}>
+        <KeyboardAvoidingView behavior={"height"} style={styles.container}>
             <Image
                 source={{uri: 'https://w7.pngwing.com/pngs/708/311/png-transparent-icon-logo-twitter-logo-twitter-logo-blue-social-media-area.png'}}
                 resizeMode={'cover'} width={100} height={100}/>
