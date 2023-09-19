@@ -1,9 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+const PROXY_URL = 'https://flash.namang.me/proxy?url='
 const PLAYER_ID = '610ee2b8-0ad2-5fff-a819-defc284b519d'
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
-import {PROXY_URL} from "../secrets";
 import {agentData} from "../data/agent-data";
 import CurrentGame from "../mocks/CurrentGame";
 

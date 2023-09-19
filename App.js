@@ -1,6 +1,5 @@
 import {StatusBar} from 'expo-status-bar';
 import {Button, StyleSheet, Text, View, Alert} from 'react-native';
-import {getEntitlementsToken, getGeoInfo, getUserInfo, login, testProxy} from "./utils/login";
 import {useContext, useEffect, useState} from "react";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {NavigationContainer} from '@react-navigation/native';

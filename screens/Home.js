@@ -1,5 +1,5 @@
-import {StyleSheet, View, Text, Pressable} from "react-native";
-import {useEffect, useState} from "react";
+import {ScrollView, StyleSheet, View, Text, Pressable} from "react-native";
+import {useContext, useEffect, useState} from "react";
 import {
     getConfig,
     getPartyDetails,
@@ -20,6 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import Colors from "../constants/Colors";
+import {AuthContext} from "../store/Auth";
 
 const QUEUE_TYPES = {
     'swiftplay': 'Swiftplay',
@@ -28,7 +29,7 @@ const QUEUE_TYPES = {
     'spikerush': 'Spike Rush',
     'ggteam': 'Escalation',
     'hurm': 'Team Deathmatch',
-    'deathmatch' : 'Deathmatch'
+    'deathmatch': 'Deathmatch'
 }
 
 const Home = () => {
@@ -39,6 +40,7 @@ const Home = () => {
     const [partyId, setPartyId] = useState('')
     const [matchId, setMatchId] = useState('')
     const [partyDetails, setPartyDetails] = useState({})
+    const auth = useContext(AuthContext)
 
     const navigation = useNavigation()
 
@@ -55,7 +57,7 @@ const Home = () => {
             // Alert.alert("Something went wrong", err?.response?.status)
         }).finally(() => setLoading(false))
 
-
+        console.log("HOME", auth.auth)
     }, []);
 
 
@@ -114,7 +116,7 @@ const Home = () => {
             setPartyDetails(response)
             const timer = setInterval(() => {
                 getPreGamePlayerStatus().then(response => {
-                    if(response.matchId) {
+                    if (response.matchId) {
                         console.log("Setting matchId", response.matchId)
                         setMatchId(response.matchId)
                         clearInterval(timer)
@@ -155,12 +157,14 @@ const Home = () => {
     // }
 
     return (
-        <View style={styles.screen}>
+        <ScrollView style={styles.screen}>
             <View style={styles.partyContainer}>
-                <Text style={styles.partyTitleText}>Party</Text>
+                <Text
+                    style={styles.partyTitleText}>Hi, {`${auth.auth.identity.game_name}#${auth.auth.identity.tag_line}`}</Text>
                 <Pressable onPress={refresh} style={({pressed}) => [pressed && styles.reduceOpacity]}>
                     <Animated.View style={[]}>
-                        <Ionicons name={"refresh"} size={24} color={'white'} entering={RotateInDownLeft.duration(3000)}/>
+                        <Ionicons name={"refresh"} size={24} color={'white'}
+                                  entering={RotateInDownLeft.duration(3000)}/>
                     </Animated.View>
                 </Pressable>
             </View>
@@ -182,14 +186,14 @@ const Home = () => {
                         useSafeArea={true}
                         onChange={(queue) => changeQueue(queue)}
                         value={partyDetails?.queueId}
-                        >
+                    >
                         {
                             Object.keys(QUEUE_TYPES)
-                            .map(queue => <Picker.Item
-                                value={queue}
-                                label={QUEUE_TYPES[queue]}
-                                key={queue}
-                            />)
+                                .map(queue => <Picker.Item
+                                    value={queue}
+                                    label={QUEUE_TYPES[queue]}
+                                    key={queue}
+                                />)
                         }
                     </Picker>
                     <View style={{minHeight: 40, flexDirection: 'row', alignItems: 'center'}}>
@@ -199,7 +203,7 @@ const Home = () => {
                                     <Text style={[styles.currentQueueLabel]}>Current</Text>
                                     <Text style={[styles.currentQueueText]}>{QUEUE_TYPES[partyDetails.queueId]}</Text>
                                 </>
-                            ): null
+                            ) : null
                         }
                     </View>
 
@@ -208,13 +212,14 @@ const Home = () => {
                     partyDetails.state !== "MATCHMAKING" && <Button label={`Start matchmaking`} onPress={queueMatch}/>
                 }
                 {
-                    partyDetails.state === "MATCHMAKING" && <Button label={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>
+                    partyDetails.state === "MATCHMAKING" &&
+                    <Button label={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>
                 }
 
             </View>
 
 
-        </View>
+        </ScrollView>
     )
 }
 

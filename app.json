@@ -16,16 +16,26 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "me.namang.reconbolt"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "me.namang.reconbolt"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "./plugins/trust-local-certs.js"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "837e1db0-cf8f-473d-91bf-a1d0e6eb67c5"
+      }
     }
   }
 }

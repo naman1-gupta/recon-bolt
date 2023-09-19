@@ -23,16 +23,23 @@ function Login() {
             let entitlements_token = await getEntitlementsToken(res.access_token)
             let geoInfo = await getGeoInfo(res.access_token, res.id_token)
 
-            console.log(entitlements_token)
+            console.log("USERINFO", userinfo)
 
             authContext.authenticate({
                 access_token: res.access_token,
                 id_token: res.id_token,
                 entitlements_token: entitlements_token,
+                identity: {
+                    sub: userinfo.sub,
+                    game_name: userinfo.acct.game_name,
+                    tag_line: userinfo.acct.tag_line,
+                }
+
             })
 
             authContext.setGeo(geoInfo)
-        } catch {
+        } catch (err) {
+            console.log("Error logging in", err)
             Alert.alert("There was an error logging in...")
         }
     }
@@ -47,7 +54,7 @@ function Login() {
     }
 
     return (
-        <KeyboardAvoidingView behavior={"height"} style={styles.container}>
+        <KeyboardAvoidingView style={styles.container}>
             <Image
                 source={{uri: 'https://w7.pngwing.com/pngs/708/311/png-transparent-icon-logo-twitter-logo-twitter-logo-blue-social-media-area.png'}}
                 resizeMode={'cover'} width={100} height={100}/>

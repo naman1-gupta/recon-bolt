@@ -6,6 +6,11 @@ export const AuthContext = createContext({
         access_token: "",
         id_token: "",
         entitlements_token: "",
+        identity: {
+            sub: '',
+            game_name: '',
+            tag_line: '',
+        }
     },
     authenticate: (token) => {},
     logout: () => {},
@@ -25,16 +30,26 @@ export function AuthContextProvider({children}) {
     const [idToken, setIdToken] = useState('')
     const [entitlementsToken, setEntitlementsToken] = useState('')
     const [geoToken, setGeoToken] = useState({})
+    const [playerIdentity, setPlayerIdentity] = useState({})
 
     const authenticate = (token) => {
         setIdToken(token.id_token)
         setAccessToken(token.access_token)
         setEntitlementsToken(token.entitlements_token)
+        setPlayerIdentity(token.identity)
+
+        console.log("TOKEN", token)
+
 
         AsyncStorage.setItem("auth", JSON.stringify({
             access_token: token.access_token,
             id_token: token.id_token,
             entitlements_token: token.entitlements_token,
+            identity: {
+                sub: token.sub,
+                game_name: token.game_name,
+                tag_line: token.tag_line,
+            }
         }))
     }
 
@@ -60,6 +75,11 @@ export function AuthContextProvider({children}) {
             access_token: accessToken,
             id_token: idToken,
             entitlementsToken: entitlementsToken,
+            identity: {
+                sub: playerIdentity.sub,
+                game_name: playerIdentity.game_name,
+                tag_line: playerIdentity.tag_line,
+            }
         },
         authenticate: authenticate,
         logout: logout,
