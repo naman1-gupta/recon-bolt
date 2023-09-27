@@ -1,7 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 const PROXY_URL = 'https://flash.namang.me/proxy?url='
-const PLAYER_ID = '610ee2b8-0ad2-5fff-a819-defc284b519d'
+// const PLAYER_ID = '610ee2b8-0ad2-5fff-a819-defc284b519d'
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
 import {agentData} from "../data/agent-data";
 import CurrentGame from "../mocks/CurrentGame";
@@ -63,10 +63,10 @@ const SERVICE_URLS = [
     "SERVICEURL_ESPORTS"
 ]
 
-export async function getConfig() {
+export async function getConfig(auth, geo) {
     return new Promise(async (resolve, reject) => {
-        const auth = JSON.parse(await AsyncStorage.getItem("auth"))
-        const geo = JSON.parse(await AsyncStorage.getItem("geo"))
+        // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+        // const geo = JSON.parse(await AsyncStorage.getItem("geo"))
         console.log("Geo", geo)
         console.log("Shard", geo.affinities.live)
 
@@ -93,10 +93,11 @@ export async function getConfig() {
     })
 }
 
-export async function getPlayerPartyId(playerId) {
+export async function getPlayerPartyId(auth) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
-    console.log("SERVICE_URL", SERVICE_URL);
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    console.log("identity", auth)
+    const PLAYER_ID = auth.identity.sub;
 
     return new Promise((resolve, reject) => {
         let url = `${SERVICE_URL}/parties/v1/players/${PLAYER_ID}`
@@ -126,42 +127,10 @@ export async function getPlayerPartyId(playerId) {
     })
 }
 
-export async function getPlayerPartyId_1(playerId) {
+
+export async function getPartyDetails(auth, partyId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
-    console.log("SERVICE_URL", SERVICE_URL);
-
-    return new Promise((resolve, reject) => {
-        let url = `${SERVICE_URL}/parties/v1/players/${playerId}`
-        // url = encodeURIComponent(url)
-        const config = {
-            url: `${url}`,
-            method: 'get',
-            headers: {
-                'authorization': `Bearer ${auth.access_token}`,
-                'x-riot-entitlements-jwt': auth.entitlements_token,
-            },
-        }
-
-        riotClient.request(config).then((response) => {
-            console.log("resolved", response.status)
-            console.log("Got party id", response.data)
-            resolve(response.data["CurrentPartyID"])
-        }).catch((err) => {
-            console.log("Error fetching party details", err)
-            if (err.response.status === 404) {
-                console.log("resolving with empty value")
-                resolve('')
-            } else {
-                reject(err.response.status)
-            }
-        })
-    })
-}
-
-export async function getPartyDetails(partyId) {
-    const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -193,9 +162,9 @@ export async function getPartyDetails(partyId) {
     })
 }
 
-export async function switchQueue(queueType, partyId) {
+export async function switchQueue(auth, queueType, partyId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -230,9 +199,9 @@ export async function switchQueue(queueType, partyId) {
 }
 
 
-export async function startMatchmaking(partyId) {
+export async function startMatchmaking(auth, partyId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -264,9 +233,11 @@ export async function startMatchmaking(partyId) {
     })
 }
 
-export async function getPreGamePlayerStatus(playerId) {
+export async function getPreGamePlayerStatus(auth) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PREGAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    const PLAYER_ID = auth.identity.sub;
+
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -296,9 +267,11 @@ export async function getPreGamePlayerStatus(playerId) {
 }
 
 
-export async function getCoreGamePlayerStatus(playerId) {
+export async function getCoreGamePlayerStatus(auth) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_COREGAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    const PLAYER_ID = auth.identity.sub;
+
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -325,9 +298,9 @@ export async function getCoreGamePlayerStatus(playerId) {
     })
 }
 
-export async function getPreGameMatchStatus(matchId) {
+export async function getPreGameMatchStatus(auth, matchId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PREGAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -352,9 +325,9 @@ export async function getPreGameMatchStatus(matchId) {
     })
 }
 
-export async function hoverAgent(agentId, matchId) {
+export async function hoverAgent(auth, agentId, matchId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PREGAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -379,9 +352,9 @@ export async function hoverAgent(agentId, matchId) {
     })
 }
 
-export async function lockAgent(agentId, matchId) {
+export async function lockAgent(auth, agentId, matchId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PREGAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -406,10 +379,9 @@ export async function lockAgent(agentId, matchId) {
     })
 }
 
-export async function leaveMatchmaking(partyId) {
-    console.log(partyId)
+export async function leaveMatchmaking(auth, partyId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PARTY")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -442,9 +414,9 @@ export async function leaveMatchmaking(partyId) {
     })
 }
 
-export async function getCurrentGameDetails(matchId) {
+export async function getCurrentGameDetails(auth, matchId) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_COREGAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -470,9 +442,11 @@ export async function getCurrentGameDetails(matchId) {
     })
 }
 
-export async function getPlayerEntitlements(playerId) {
+export async function getPlayerEntitlements(auth) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_STORE")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    const PLAYER_ID = auth.identity.sub;
+
 
     return new Promise((resolve, reject) => {
         const config = {
@@ -496,9 +470,9 @@ export async function getPlayerEntitlements(playerId) {
     })
 }
 
-export async function getPlayerNames(playerIds) {
+export async function getPlayerNames(auth, playerIds) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_NAME")
-    const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     return new Promise((resolve, reject) => {
         const config = {

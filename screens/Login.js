@@ -1,6 +1,6 @@
 import {useContext, useState} from "react";
 import {AuthContext} from "../store/Auth";
-import {getEntitlementsToken, getGeoInfo, getUserInfo, login} from "../utils/login";
+import {getEntitlementsToken, getGeoInfo, getUserInfo, login, refreshLogin, userLogin} from "../utils/login";
 import {Alert, KeyboardAvoidingView, StyleSheet, View} from "react-native";
 import Colors from "../constants/Colors";
 import {Button, Image, TextField} from 'react-native-ui-lib'
@@ -17,27 +17,50 @@ function Login() {
     async function performLogin() {
         console.log("performing login...")
         try {
-            let res = await login(email, password)
-            console.log("getting user info")
-            let userinfo = await getUserInfo(res.access_token)
-            let entitlements_token = await getEntitlementsToken(res.access_token)
-            let geoInfo = await getGeoInfo(res.access_token, res.id_token)
+            // console.log(await refreshLogin({}, true))
+            setTimeout(async () => {
+                // console.log(" USERLOGIN ===> ", await userLogin(email, password))
+                let res = await login(email, password)
+                // console.log("getting user info")
+                let userinfo = await getUserInfo(res.access_token)
+                let entitlements_token = await getEntitlementsToken(res.access_token)
+                let geoInfo = await getGeoInfo(res.access_token, res.id_token)
 
-            console.log("USERINFO", userinfo)
+                console.log("USERINFO", userinfo)
+                await authContext.setGeo(geoInfo)
+                await authContext.authenticate({
+                    access_token: res.access_token,
+                    id_token: res.id_token,
+                    entitlements_token: entitlements_token,
+                    identity: {
+                        sub: userinfo.sub,
+                        game_name: userinfo.acct.game_name,
+                        tag_line: userinfo.acct.tag_line,
+                    }
 
-            authContext.authenticate({
-                access_token: res.access_token,
-                id_token: res.id_token,
-                entitlements_token: entitlements_token,
-                identity: {
-                    sub: userinfo.sub,
-                    game_name: userinfo.acct.game_name,
-                    tag_line: userinfo.acct.tag_line,
-                }
+                })
+            }, 1000)
+            // console.log(" USERLOGIN ===> ", await userLogin(email, password))
+            // let res = await login(email, password)
+            // console.log("getting user info")
+            // let userinfo = await getUserInfo(res.access_token)
+            // let entitlements_token = await getEntitlementsToken(res.access_token)
+            // let geoInfo = await getGeoInfo(res.access_token, res.id_token)
+            //
+            // console.log("USERINFO", userinfo)
+            // await authContext.setGeo(geoInfo)
+            // await authContext.authenticate({
+            //     access_token: res.access_token,
+            //     id_token: res.id_token,
+            //     entitlements_token: entitlements_token,
+            //     identity: {
+            //         sub: userinfo.sub,
+            //         game_name: userinfo.acct.game_name,
+            //         tag_line: userinfo.acct.tag_line,
+            //     }
+            //
+            // })
 
-            })
-
-            authContext.setGeo(geoInfo)
         } catch (err) {
             console.log("Error logging in", err)
             Alert.alert("There was an error logging in...")
@@ -45,7 +68,6 @@ function Login() {
     }
 
     const onChangeText = (type, text) => {
-        console.log(text, type)
         if (type === "password") {
             setPassword(text)
         } else {

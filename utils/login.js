@@ -21,17 +21,6 @@ export async function login(username, password) {
             "response_type": "token id_token"
         });
 
-        let config = {
-            method: 'POST',
-            headers: {
-                'accept': '*/*',
-                'content-type': 'application/json',
-                'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
-            },
-            body: data
-        }
-
         fetch(RIOT_AUTH, {
             method: 'POST',
             headers: {
@@ -100,7 +89,61 @@ export async function login(username, password) {
         });
 
     })
+}
 
+
+export async function userLogin(username, password, cookie) {
+    return new Promise((resolve, reject) => {
+        const data = JSON.stringify({
+            "username": username,
+            "password": password,
+            "remember": true,
+            "type": "auth"
+        });
+
+        fetch(RIOT_AUTH, {
+            method: 'PUT',
+            headers: {
+                'accept': '*/*',
+                'content-type': 'application/json',
+                'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
+                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
+            },
+            body: data,
+        }).then(response => response.json()).then(data => {
+            console.log(data)
+            resolve(parseLoginResponse(data.response.parameters.uri))
+        })
+    })
+}
+
+
+
+export async function refreshLogin(auth, omitCredentials= false) {
+    return new Promise(async (resolve, reject) => {
+        let data = JSON.stringify({
+            "client_id": "play-valorant-web-prod",
+            "nonce": 1,
+            "redirect_uri": "https://playvalorant.com/",
+            "scope": "account openid",
+            "response_type": "token id_token"
+        });
+
+        // console.log('omit credentials', credentials)
+        fetch(RIOT_AUTH, {
+            method: 'POST',
+            headers: {
+                'accept': '*/*',
+                'content-type': 'application/json',
+                'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
+                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
+            },
+            body: data,
+            credentials: 'omit',
+        }).then(response => response.json())
+            .then(data => resolve(data))
+
+    })
 }
 
 const parseLoginResponse = (data) => {

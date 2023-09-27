@@ -31,9 +31,11 @@ const Root = () => {
     useEffect(() => {
         async function getToken() {
             const storedToken = await AsyncStorage.getItem("auth")
-            if (storedToken) {
+            const storedGeoInfo = await AsyncStorage.getItem("geo")
+            if (storedToken && storedGeoInfo) {
                 console.log("Stored Token", storedToken)
                 authContext.authenticate(JSON.parse(storedToken));
+                authContext.setGeo(JSON.parse(storedGeoInfo));
             }
 
             setLoading(false)

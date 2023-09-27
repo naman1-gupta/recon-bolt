@@ -32,7 +32,7 @@ export function AuthContextProvider({children}) {
     const [geoToken, setGeoToken] = useState({})
     const [playerIdentity, setPlayerIdentity] = useState({})
 
-    const authenticate = (token) => {
+    const authenticate = async (token) => {
         setIdToken(token.id_token)
         setAccessToken(token.access_token)
         setEntitlementsToken(token.entitlements_token)
@@ -40,20 +40,24 @@ export function AuthContextProvider({children}) {
 
         console.log("TOKEN", token)
 
-
-        AsyncStorage.setItem("auth", JSON.stringify({
+        const storedToken = {
             access_token: token.access_token,
             id_token: token.id_token,
             entitlements_token: token.entitlements_token,
             identity: {
-                sub: token.sub,
-                game_name: token.game_name,
-                tag_line: token.tag_line,
+                sub: token.identity.sub,
+                game_name: token.identity.game_name,
+                tag_line: token.identity.tag_line,
             }
-        }))
+        }
+
+        console.log("STORED_TOKEN", storedToken)
+
+        await AsyncStorage.setItem("auth", JSON.stringify(storedToken))
     }
 
     const setGeo = (geo) => {
+        console.log("GEO TOKEN", geo)
         setGeoToken(geo)
         AsyncStorage.setItem("geo", JSON.stringify(geo))
     }
@@ -74,12 +78,8 @@ export function AuthContextProvider({children}) {
         auth: {
             access_token: accessToken,
             id_token: idToken,
-            entitlementsToken: entitlementsToken,
-            identity: {
-                sub: playerIdentity.sub,
-                game_name: playerIdentity.game_name,
-                tag_line: playerIdentity.tag_line,
-            }
+            entitlements_token: entitlementsToken,
+            identity: playerIdentity
         },
         authenticate: authenticate,
         logout: logout,

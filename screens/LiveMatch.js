@@ -1,10 +1,11 @@
 import {Button, ScrollView, StyleSheet, Text, View} from 'react-native'
-import {getCoreGamePlayerStatus, getCurrentGameDetails, getPlayerNames, getPlayerPartyId_1} from "../utils/game";
+import {getCoreGamePlayerStatus, getCurrentGameDetails, getPlayerNames} from "../utils/game";
 import {useRoute} from "@react-navigation/native";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import {Card} from "react-native-ui-lib";
 import {agentData} from "../data/agent-data";
 import Colors from "../constants/Colors";
+import {AuthContext} from "../store/Auth";
 
 
 const LiveMatch = () => {
@@ -16,10 +17,11 @@ const LiveMatch = () => {
     const [blueTeamPlayers, setBlueTeamPlayers] = useState([])
     const [playerDetails, setPlayerDetails] = useState({})
     const [isLoading, setIsLoading] = useState(true)
+    const {auth} = useContext(AuthContext)
 
     const getGameDetails = () => {
         console.log("ASking for details", currentMatchId)
-        getCurrentGameDetails(currentMatchId).then(response => {
+        getCurrentGameDetails(auth, currentMatchId).then(response => {
             console.log("matchdetails livematch", response)
             setMatchDetails(response)
         })
@@ -30,7 +32,7 @@ const LiveMatch = () => {
         if (matchId) {
             setCurrentMatchId(matchId)
         } else {
-            getCoreGamePlayerStatus().then(response => {
+            getCoreGamePlayerStatus(auth).then(response => {
                 console.log("cuurent matchid", response)
                 setCurrentMatchId(response.matchId)
             })
@@ -44,7 +46,7 @@ const LiveMatch = () => {
         }
 
         const playerIds = matchDetails['Players'].map(player => player['Subject'])
-        getPlayerNames(playerIds).then(response => {
+        getPlayerNames(auth, playerIds).then(response => {
             const details = {}
             response.forEach(player => {
                 details[player['Subject']] = player
@@ -65,22 +67,9 @@ const LiveMatch = () => {
     }, [matchDetails]);
 
 
-    const fetchPartyDetails = () => {
-        const playerIds = matchDetails['Players'].map(player => player['Subject'])
-        getPlayerPartyId_1(playerIds[0]).then(response => {
-            console.log("Player party details", playerIds[0], response);
-        }).catch(err => console.log("error fetching party details of a diff player", playerIds[0], err))
-
-        getPlayerPartyId_1(playerIds[1]).then(response => {
-            console.log("Player party details", playerIds[1], response)
-        }).catch(err => console.log("error fetching party details of a diff player", playerIds[1], err))
-
-    }
-
     return (
         <View style={styles.screen}>
             <Button title={"Get Match Details"} onPress={getGameDetails}/>
-            <Button title={"Get party details for each player"} onPress={fetchPartyDetails}/>
             <Text>Live Match</Text>
             {
                 !isLoading &&

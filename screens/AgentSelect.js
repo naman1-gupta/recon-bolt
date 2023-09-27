@@ -1,9 +1,10 @@
 import {Dimensions, FlatList, Image, Pressable, StyleSheet, View} from 'react-native';
 import {agentData} from "../data/agent-data";
 import {getCoreGamePlayerStatus, getPlayerEntitlements, hoverAgent, lockAgent} from "../utils/game";
-import {useEffect, useState} from "react";
+import {useContext, useEffect, useState} from "react";
 import Button from 'react-native-ui-lib/button'
 import Colors from "../constants/Colors";
+import {AuthContext} from "../store/Auth";
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -20,11 +21,12 @@ function AgentSelect({route, navigation}) {
     const [playableAgents, setPlayableAgents] = useState([])
     const [unlockedCharacterIDs, setUnlockedCharacterIDs] = useState([])
     const [agentLocked, setAgentLocked] = useState(false)
+    const {auth} = useContext(AuthContext)
 
     const matchId = route.params?.matchId
 
     useEffect(() => {
-        getPlayerEntitlements().then(response => {
+        getPlayerEntitlements(auth).then(response => {
             const charsUnlockedWithContracts = response['EntitlementsByTypes']
                 .filter(entitlementType => entitlementType["ItemTypeID"] === PLAYER_ITEM_TYPE_ID)[0].Entitlements
                 .map(entitlement => entitlement.ItemID)
@@ -46,7 +48,7 @@ function AgentSelect({route, navigation}) {
         }
         console.log("Selected agent id", agentId, matchId);
         selectAgent(agentId)
-        hoverAgent(agentId, matchId)
+        hoverAgent(auth, agentId, matchId)
             .then(response => {
                 console.log("agent select", response)
             })
@@ -54,10 +56,10 @@ function AgentSelect({route, navigation}) {
     }
 
     const onAgentLocked = () => {
-        lockAgent(agent, matchId).then(response => {
+        lockAgent(auth, agent, matchId).then(response => {
             setAgentLocked(true)
             const timer = setInterval(() => {
-                getCoreGamePlayerStatus().then(response => {
+                getCoreGamePlayerStatus(auth).then(response => {
                     clearInterval(timer)
 
                     navigation.navigate("LiveMatch", {matchId: matchId})

@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fsPromises = fs.promises;
 
-const { getMainApplicationOrThrow} = AndroidConfig.Manifest
+const { getMainApplicationOrThrow } = AndroidConfig.Manifest
 
 const withTrustLocalCerts = config => {
     return withAndroidManifest(config, async config => {

@@ -40,13 +40,13 @@ const Home = () => {
     const [partyId, setPartyId] = useState('')
     const [matchId, setMatchId] = useState('')
     const [partyDetails, setPartyDetails] = useState({})
-    const auth = useContext(AuthContext)
+    const {auth, geo} = useContext(AuthContext)
 
     const navigation = useNavigation()
 
     useEffect(() => {
-        getConfig().then((response) => {
-            getPlayerPartyId().then(partyId => {
+        getConfig(auth, geo).then((response) => {
+            getPlayerPartyId(auth).then(partyId => {
                 console.log("PartyId", partyId)
                 setPartyId(partyId)
             }).catch(err => {
@@ -57,7 +57,7 @@ const Home = () => {
             // Alert.alert("Something went wrong", err?.response?.status)
         }).finally(() => setLoading(false))
 
-        console.log("HOME", auth.auth)
+        console.log("HOME", auth)
     }, []);
 
 
@@ -65,7 +65,7 @@ const Home = () => {
         console.log("Running after updating")
         // const timer = setInterval(() => {
         console.log("Running inside setINterval", partyId)
-        getPartyDetails(partyId)
+        getPartyDetails(auth, partyId)
             .then(details => {
                 setPartyDetails(details)
             })
@@ -87,7 +87,7 @@ const Home = () => {
 
     useEffect(() => {
         console.log("Getting pregame status")
-        getPreGameMatchStatus(matchId).then(response => {
+        getPreGameMatchStatus(auth, matchId).then(response => {
             console.log("pregame status, navigating", response, matchId)
             if ("AllyTeam" in response) {
                 navigation.navigate("AgentSelect", {
@@ -98,7 +98,7 @@ const Home = () => {
     }, [matchId]);
 
     const refresh = () => {
-        getPlayerPartyId().then(partyId => {
+        getPlayerPartyId(auth).then(partyId => {
             console.log("PartyId", partyId)
             setPartyId(partyId)
         }).catch(err => {
@@ -107,15 +107,15 @@ const Home = () => {
     }
 
     const changeQueue = (queueId) => {
-        switchQueue(queueId, partyId).then(response => setPartyDetails(response))
+        switchQueue(auth, queueId, partyId).then(response => setPartyDetails(response))
             .catch(err => console.log("Change queue err", err))
     }
 
     const queueMatch = () => {
-        startMatchmaking(partyId).then(response => {
+        startMatchmaking(auth, partyId).then(response => {
             setPartyDetails(response)
             const timer = setInterval(() => {
-                getPreGamePlayerStatus().then(response => {
+                getPreGamePlayerStatus(auth).then(response => {
                     if (response.matchId) {
                         console.log("Setting matchId", response.matchId)
                         setMatchId(response.matchId)
@@ -129,7 +129,7 @@ const Home = () => {
     }
 
     const leaveMatchmakingQueue = () => {
-        leaveMatchmaking(partyId).then(response => {
+        leaveMatchmaking(auth, partyId).then(response => {
             setPartyDetails(response)
         })
     }
@@ -160,7 +160,7 @@ const Home = () => {
         <ScrollView style={styles.screen}>
             <View style={styles.partyContainer}>
                 <Text
-                    style={styles.partyTitleText}>Hi, {`${auth.auth.identity.game_name}#${auth.auth.identity.tag_line}`}</Text>
+                    style={styles.partyTitleText}>Hi, {`${auth.identity?.game_name}#${auth.identity?.tag_line}`}</Text>
                 <Pressable onPress={refresh} style={({pressed}) => [pressed && styles.reduceOpacity]}>
                     <Animated.View style={[]}>
                         <Ionicons name={"refresh"} size={24} color={'white'}
