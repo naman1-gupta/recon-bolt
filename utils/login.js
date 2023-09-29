@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CookieManager from "@react-native-cookies/cookies";
 
 
 const RIOT_AUTH = 'https://auth.riotgames.com/api/v1/authorization'
@@ -8,91 +9,7 @@ const USERINFO = 'https://auth.riotgames.com/userinfo'
 const ENTITLEMENTS_API = 'https://entitlements.auth.riotgames.com/api/token/v1'
 const GEO_API = 'https://riot-geo.pas.si.riotgames.com/pas/v1/product/valorant'
 
-export async function login(username, password) {
-    const auth = await AsyncStorage.getItem("auth")
-    console.log("AUTH =>", auth);
-
-    return new Promise(async (resolve, reject) => {
-        let data = JSON.stringify({
-            "client_id": "play-valorant-web-prod",
-            "nonce": 1,
-            "redirect_uri": "https://playvalorant.com/",
-            "scope": "account openid",
-            "response_type": "token id_token"
-        });
-
-        fetch(RIOT_AUTH, {
-            method: 'POST',
-            headers: {
-                'accept': '*/*',
-                'content-type': 'application/json',
-                'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
-                'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
-            },
-            body: data,
-            // credentials: "omit"
-        }).then((response) => {
-            const allowedCookies = ["tdid", "clid", "asid"]
-            const validCookies = []
-
-            const cookies = response.headers.get("set-cookie").split(' ')
-            cookies.forEach(c => {
-                let flag = -1
-                allowedCookies.forEach(ac => {
-                    if (c.startsWith(ac)) {
-                        flag = 0;
-                        console.log(c.substring(0, c.length - 1))
-                    }
-                })
-
-                if (flag === 0) {
-                    validCookies.push(c.substring(0, c.length - 1))
-                }
-            })
-
-            const cookie = validCookies.join('; ')
-
-            return new Promise((resolve, reject) => {
-                response.json().then(data => resolve({
-                    cookie: cookie,
-                    data: data
-                })).catch(err => console.log("error", err))
-            })
-
-        }).then(({data, cookie}) => {
-            console.log("data", data)
-            if (data.type === "auth") {
-                data = JSON.stringify({
-                    "username": username,
-                    "password": password,
-                    "remember": true,
-                    "type": "auth"
-                });
-
-                fetch(RIOT_AUTH, {
-                    method: 'PUT',
-                    headers: {
-                        'accept': '*/*',
-                        'content-type': 'application/json',
-                        'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
-                        'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
-                        'cookie': cookie
-                    },
-                    body: data,
-                }).then(response => response.json()).then(data => {
-                    resolve(data.response.parameters.uri)
-                })
-            } else {
-                console.log("DATA", data.response.parameters.uri);
-                resolve(parseLoginResponse(data.response.parameters.uri))
-            }
-        });
-
-    })
-}
-
-
-export async function userLogin(username, password, cookie) {
+export async function userLogin(username, password) {
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({
             "username": username,
@@ -101,25 +18,23 @@ export async function userLogin(username, password, cookie) {
             "type": "auth"
         });
 
-        fetch(RIOT_AUTH, {
-            method: 'PUT',
+        axios.put(RIOT_AUTH, data, {
             headers: {
                 'accept': '*/*',
                 'content-type': 'application/json',
                 'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
                 'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
+                // Cookie: cookie
             },
-            body: data,
-        }).then(response => response.json()).then(data => {
-            console.log(data)
-            resolve(parseLoginResponse(data.response.parameters.uri))
+            withCredentials: true,
+        }).then(response => {
+            resolve(parseLoginResponse(response.data.response.parameters.uri))
         })
     })
 }
 
 
-
-export async function refreshLogin(auth, omitCredentials= false) {
+export async function getCookies(auth, omitCredentials = false) {
     return new Promise(async (resolve, reject) => {
         let data = JSON.stringify({
             "client_id": "play-valorant-web-prod",
@@ -129,19 +44,44 @@ export async function refreshLogin(auth, omitCredentials= false) {
             "response_type": "token id_token"
         });
 
-        // console.log('omit credentials', credentials)
-        fetch(RIOT_AUTH, {
-            method: 'POST',
+        axios.post(RIOT_AUTH, data, {
             headers: {
                 'accept': '*/*',
                 'content-type': 'application/json',
                 'user-agent': 'Recon%20Bolt/2 CFNetwork/1390 Darwin/22.0.0',
                 'accept-language': 'en-IN,en-GB;q=0.9,en;q=0.8',
             },
-            body: data,
-            credentials: 'omit',
-        }).then(response => response.json())
-            .then(data => resolve(data))
+            withCredentials: !omitCredentials,
+        }).then(async response => {
+
+            if (omitCredentials) {
+                const required_cookies = ["tdid", "asid", "clid", "__cf"]
+                const cookies = []
+
+
+                response.headers["set-cookie"].forEach(cookie =>
+                    cookie.split(', ').forEach(c => {
+                        if (required_cookies.includes(c.substring(0, 4))) {
+                            cookies.push(c.split('; ')[0])
+                        }
+                    })
+                )
+
+                await CookieManager.clearAll()
+                for (const cookie of cookies) {
+                    let cookie_fields = cookie.split("=")
+                    await CookieManager.set(RIOT_AUTH, {
+                        name: cookie_fields[0],
+                        value: cookie_fields[1],
+                    })
+                }
+            } else {
+                resolve(parseLoginResponse(response.data.response.parameters.uri))
+            }
+
+        }).catch((err) => {
+            console.log("Error fetching cookies", err)
+        })
 
     })
 }
@@ -163,7 +103,7 @@ const parseLoginResponse = (data) => {
 
 
 export async function getUserInfo(token) {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -178,7 +118,6 @@ export async function getUserInfo(token) {
             withCredentials: true,
         }
         axios.request(config).then(response => {
-            console.log("UserInfo", response.data);
             resolve(response.data)
         }).catch(err => {
             console.log("err getting userinfo", err.response, err.response.data)
@@ -186,12 +125,10 @@ export async function getUserInfo(token) {
         })
 
     })
-
-    return promise
 }
 
 export async function getEntitlementsToken(token) {
-    const promise = new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         const config = {
             method: 'post',
             maxBodyLength: Infinity,
@@ -208,15 +145,13 @@ export async function getEntitlementsToken(token) {
         }
 
         axios.request(config).then(response => {
-            console.log("Entitlements response", response.data);
+            // console.log("Entitlements response", response.data);
             resolve(response.data.entitlements_token)
         }).catch(err => {
             console.log("err getting entitlements token", err.response.data)
             reject(err)
         })
     })
-
-    return promise
 }
 
 
@@ -240,7 +175,6 @@ export async function getGeoInfo(access_token, id_token) {
         }
 
         axios.request(config).then(async (response) => {
-            console.log("Geo data", response.data)
             await AsyncStorage.setItem("geo", JSON.stringify(response.data))
             resolve(response.data)
         }).catch(err => {

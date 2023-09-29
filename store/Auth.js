@@ -12,8 +12,10 @@ export const AuthContext = createContext({
             tag_line: '',
         }
     },
-    authenticate: (token) => {},
-    logout: () => {},
+    authenticate: (token) => {
+    },
+    logout: () => {
+    },
     geo: {
         affinities: {
             live: "",
@@ -21,7 +23,8 @@ export const AuthContext = createContext({
         },
         token: ""
     },
-    setGeo: () => {}
+    setGeo: () => {
+    }
 });
 
 
@@ -38,7 +41,7 @@ export function AuthContextProvider({children}) {
         setEntitlementsToken(token.entitlements_token)
         setPlayerIdentity(token.identity)
 
-        console.log("TOKEN", token)
+        // console.log("TOKEN", token)
 
         const storedToken = {
             access_token: token.access_token,
@@ -51,19 +54,15 @@ export function AuthContextProvider({children}) {
             }
         }
 
-        console.log("STORED_TOKEN", storedToken)
+        // console.log("STORED_TOKEN", storedToken)
 
         await AsyncStorage.setItem("auth", JSON.stringify(storedToken))
     }
 
     const setGeo = (geo) => {
-        console.log("GEO TOKEN", geo)
+        // console.log("GEO TOKEN", geo)
         setGeoToken(geo)
         AsyncStorage.setItem("geo", JSON.stringify(geo))
-    }
-
-    const setEntitlements = (token) => {
-        setEntitlementsToken(token)
     }
 
     const logout = () => {

@@ -1,8 +1,8 @@
-import {Button, ScrollView, StyleSheet, Text, View} from 'react-native'
+import {ScrollView, StyleSheet, Text, View} from 'react-native'
 import {getCoreGamePlayerStatus, getCurrentGameDetails, getPlayerNames} from "../utils/game";
 import {useRoute} from "@react-navigation/native";
 import {useContext, useEffect, useState} from "react";
-import {Card} from "react-native-ui-lib";
+import {Button, Card} from "react-native-ui-lib";
 import {agentData} from "../data/agent-data";
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
@@ -20,20 +20,23 @@ const LiveMatch = () => {
     const {auth} = useContext(AuthContext)
 
     const getGameDetails = () => {
-        console.log("ASking for details", currentMatchId)
+        if (!currentMatchId){
+            return
+        }
+
+        console.log("Requesting match details for matchId:", currentMatchId)
         getCurrentGameDetails(auth, currentMatchId).then(response => {
-            console.log("matchdetails livematch", response)
             setMatchDetails(response)
         })
     }
 
     useEffect(() => {
-        console.log("route matchid", matchId)
+        console.log("Route matchID: ", matchId)
         if (matchId) {
             setCurrentMatchId(matchId)
         } else {
             getCoreGamePlayerStatus(auth).then(response => {
-                console.log("cuurent matchid", response)
+                console.log("Current MatchID: ", response)
                 setCurrentMatchId(response.matchId)
             })
         }
@@ -52,7 +55,7 @@ const LiveMatch = () => {
                 details[player['Subject']] = player
             })
 
-            console.log("Details", details)
+            console.log("Details: ", details)
 
             setPlayerDetails(details)
 
@@ -62,14 +65,14 @@ const LiveMatch = () => {
             const redTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Red")
             setRedTeamPlayers(redTeamPlayers)
             setIsLoading(false)
-        }).catch(err => console.log("Error fetching player details"))
+        }).catch(err => console.log("Error fetching player details", err))
 
     }, [matchDetails]);
 
 
     return (
         <View style={styles.screen}>
-            <Button title={"Get Match Details"} onPress={getGameDetails}/>
+            <Button label={"Get Match Details"} onPress={getGameDetails}/>
             <Text>Live Match</Text>
             {
                 !isLoading &&

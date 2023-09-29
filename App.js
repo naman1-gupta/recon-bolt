@@ -1,5 +1,5 @@
 import {StatusBar} from 'expo-status-bar';
-import {Button, StyleSheet, Text, View, Alert} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 import {useContext, useEffect, useState} from "react";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {NavigationContainer} from '@react-navigation/native';
@@ -11,6 +11,7 @@ import AgentSelect from "./screens/AgentSelect";
 import LiveMatch from "./screens/LiveMatch";
 import Colors from "./constants/Colors";
 import Login from './screens/Login';
+import {getCookies, getEntitlementsToken, getUserInfo} from "./utils/login";
 
 
 const Tab = createBottomTabNavigator();
@@ -30,10 +31,29 @@ const Root = () => {
     const [loading, setLoading] = useState(true)
     useEffect(() => {
         async function getToken() {
-            const storedToken = await AsyncStorage.getItem("auth")
+            let storedToken = await AsyncStorage.getItem("auth")
             const storedGeoInfo = await AsyncStorage.getItem("geo")
+
+            const authToken = await getCookies({}, false)
+            const entitlementsToken = await getEntitlementsToken(authToken.access_token)
+            const userInfo = await getUserInfo(authToken.access_token)
+
+            console.log("Stored refreshed token", storedToken)
+
+
+            // storedToken = {
+            //     ...authToken,
+            //     entitlements_token: entitlementsToken,
+            //     identity: {
+            //         sub: userInfo.sub,
+            //         game_name: userInfo.acct.game_name,
+            //         tag_line: userInfo.acct.tag_line,
+            //     }
+            // }
+
+            console.log("Stored refreshed token", storedToken)
+
             if (storedToken && storedGeoInfo) {
-                console.log("Stored Token", storedToken)
                 authContext.authenticate(JSON.parse(storedToken));
                 authContext.setGeo(JSON.parse(storedGeoInfo));
             }
@@ -103,7 +123,7 @@ const AuthenticatedStack = () => {
         }}/>
         <Tab.Screen name={"AgentSelect"}
                     component={AgentSelect}
-                    options={{ tabBarButton: (props) => null }} />
+                    options={{ tabBarButton: () => null }} />
         <Tab.Screen name={"LiveMatch"}
                     component={LiveMatch}
                     options={{
