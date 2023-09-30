@@ -12,6 +12,7 @@ import LiveMatch from "./screens/LiveMatch";
 import Colors from "./constants/Colors";
 import Login from './screens/Login';
 import {getCookies, getEntitlementsToken, getUserInfo} from "./utils/login";
+import PlayerCareer from "./screens/PlayerCareer";
 
 
 const Tab = createBottomTabNavigator();
@@ -38,18 +39,18 @@ const Root = () => {
             const entitlementsToken = await getEntitlementsToken(authToken.access_token)
             const userInfo = await getUserInfo(authToken.access_token)
 
-            console.log("Stored refreshed token", storedToken)
+            console.log("Stored old token", storedToken)
 
-
-            // storedToken = {
-            //     ...authToken,
-            //     entitlements_token: entitlementsToken,
-            //     identity: {
-            //         sub: userInfo.sub,
-            //         game_name: userInfo.acct.game_name,
-            //         tag_line: userInfo.acct.tag_line,
-            //     }
-            // }
+            storedToken = JSON.stringify({
+                access_token: authToken.access_token,
+                id_token: authToken.id_token,
+                entitlements_token: entitlementsToken,
+                identity: {
+                    sub: userInfo.sub,
+                    game_name: userInfo.acct.game_name,
+                    tag_line: userInfo.acct.tag_line,
+                }
+            })
 
             console.log("Stored refreshed token", storedToken)
 
@@ -126,6 +127,14 @@ const AuthenticatedStack = () => {
                     options={{ tabBarButton: () => null }} />
         <Tab.Screen name={"LiveMatch"}
                     component={LiveMatch}
+                    options={{
+                        tabBarIcon: ({color}) =>
+                            <Ionicons name={"game-controller"}
+                                      size={24}
+                                      color={color}/>
+                    }} />
+        <Tab.Screen name={"PlayerCareer"}
+                    component={PlayerCareer}
                     options={{
                         tabBarIcon: ({color}) =>
                             <Ionicons name={"game-controller"}

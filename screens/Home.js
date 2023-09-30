@@ -64,7 +64,6 @@ const Home = () => {
     useEffect(() => {
         console.log("Running after updating")
         // const timer = setInterval(() => {
-        console.log("Running inside setINterval", partyId)
         getPartyDetails(auth, partyId)
             .then(details => {
                 setPartyDetails(details)

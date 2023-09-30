@@ -1,11 +1,18 @@
 import {ScrollView, StyleSheet, Text, View} from 'react-native'
-import {getCoreGamePlayerStatus, getCurrentGameDetails, getPlayerNames} from "../utils/game";
+import {
+    getCoreGamePlayerStatus,
+    getCurrentGameDetails,
+    getPlayerCompetitveUpdates,
+    getPlayerNames
+} from "../utils/game";
 import {useRoute} from "@react-navigation/native";
 import {useContext, useEffect, useState} from "react";
 import {Button, Card} from "react-native-ui-lib";
 import {agentData} from "../data/agent-data";
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
+import Agent from "../components/agent";
+import {combineTransition} from "react-native-reanimated";
 
 
 const LiveMatch = () => {
@@ -20,6 +27,7 @@ const LiveMatch = () => {
     const {auth} = useContext(AuthContext)
 
     const getGameDetails = () => {
+        console.log(currentMatchId)
         if (!currentMatchId){
             return
         }
@@ -44,30 +52,40 @@ const LiveMatch = () => {
 
     useEffect(() => {
         console.log("MatchDetails", matchDetails)
-        if (!matchDetails) {
+        if (!matchDetails || Object.keys(matchDetails).length === 0) {
             return
         }
 
         const playerIds = matchDetails['Players'].map(player => player['Subject'])
         getPlayerNames(auth, playerIds).then(response => {
             const details = {}
+
             response.forEach(player => {
                 details[player['Subject']] = player
             })
 
-            console.log("Details: ", details)
+            new Promise.all(playerIds.map(playerId => getPlayerCompetitveUpdates(auth, playerId,  0, 1))).then(
+                response => {
+                    response.forEach(res => details[res['Subject']]["Rank"] = res["Matches"].length === 0 ? res["Matches"][0].TierAfterUpdate : 0)
 
-            setPlayerDetails(details)
+                    setPlayerDetails(details)
 
-            const blueTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Blue")
-            setBlueTeamPlayers(blueTeamPlayers)
+                    const blueTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Blue")
+                    setBlueTeamPlayers(blueTeamPlayers)
 
-            const redTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Red")
-            setRedTeamPlayers(redTeamPlayers)
-            setIsLoading(false)
+                    const redTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Red")
+                    setRedTeamPlayers(redTeamPlayers)
+                    setIsLoading(false)
+                }
+            ).catch(err => console.log(err))
+
+
         }).catch(err => console.log("Error fetching player details", err))
 
     }, [matchDetails]);
+
+
+
 
 
     return (
@@ -78,32 +96,9 @@ const LiveMatch = () => {
                 !isLoading &&
                 <ScrollView style={styles.scrollViewContainer}>
                     <View>
-
                         {blueTeamPlayers.map(
                             player => (
-
-                                <Card style={[styles.playerContainer, styles.allyPlayerContainer]} flex row
-                                      onPress={() => console.log('pressed')}>
-                                    <View style={styles.gameBoardAgentIconContainer}>
-                                        <Card.Image style={styles.gameBoardAgentIcon}
-                                                    source={{uri: agentData.find(agent => player['CharacterID'] === agent.uuid).displayIconSmall}}
-                                                    key={player['Subject']}
-                                        />
-                                    </View>
-                                    <View style={styles.gameBoardAgentInfoContainer}>
-                                        <Card.Section content={[{
-                                            text: playerDetails[player['Subject']]['GameName'],
-                                            text70: true,
-                                            grey10: true
-                                        }]}/>
-                                        <Card.Section content={[{
-                                            text: agentData.find(agent => agent.uuid === player['CharacterID']).displayName,
-                                            text70: true,
-                                            grey10: true
-                                        }]}/>
-                                    </View>
-
-                                </Card>
+                                <Agent player={player} playerDetails={playerDetails} containerStyle={"ally"}/>
                             )
                         )}
                     </View>
@@ -111,28 +106,7 @@ const LiveMatch = () => {
 
                         {redTeamPlayers.map(
                             player => (
-                                <Card style={[styles.playerContainer, styles.enemyPlayerContainer]} flex row
-                                      onPress={() => console.log('pressed')}>
-                                    <View style={styles.gameBoardAgentIconContainer}>
-                                        <Card.Image style={styles.gameBoardAgentIcon}
-                                                    source={{uri: agentData.find(agent => player['CharacterID'] === agent.uuid).displayIconSmall}}
-                                                    key={player['Subject']}
-                                        />
-                                    </View>
-                                    <View style={styles.gameBoardAgentInfoContainer}>
-                                        <Card.Section content={[{
-                                            text: playerDetails[player['Subject']]['GameName'],
-                                            text70: true,
-                                            grey10: true
-                                        }]}/>
-                                        <Card.Section content={[{
-                                            text: agentData.find(agent => agent.uuid === player['CharacterID']).displayName,
-                                            text70: true,
-                                            grey10: true
-                                        }]}/>
-                                    </View>
-
-                                </Card>
+                                <Agent player={player} playerDetails={playerDetails} containerStyle={"enemy"}/>
                             ))}
                     </View>
                 </ScrollView>

@@ -29,6 +29,8 @@ export async function userLogin(username, password) {
             withCredentials: true,
         }).then(response => {
             resolve(parseLoginResponse(response.data.response.parameters.uri))
+        }).catch(err => {
+            reject(err)
         })
     })
 }

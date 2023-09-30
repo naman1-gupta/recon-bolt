@@ -1,5 +1,6 @@
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CurrentGame from "../mocks/CurrentGame";
 
 const PROXY_URL = 'https://flash.namang.me/proxy?url='
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
@@ -427,6 +428,7 @@ export async function getCurrentGameDetails(auth, matchId) {
         riotClient.request(config).then(async (response) => {
             resolve(response.data)
         }).catch((err) => {
+            // resolve(CurrentGame)
             if (err.response.status === 404) {
                 resolve({})
             } else {
@@ -485,6 +487,67 @@ export async function getPlayerNames(auth, playerIds) {
         }).catch((err) => {
             if (err.response.status === 404) {
                 resolve({})
+            } else {
+                reject(err.response.status)
+            }
+        })
+    })
+}
+
+export async function getPlayerCompetitveUpdates(auth, playerId, startIndex = 0, endIndex = 10, queue = 'competitive') {
+    const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_MMR")
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+
+    // playerId = "610ee2b8-0ad2-5fff-a819-defc284b519d"
+
+    return new Promise((resolve, reject) => {
+        const config = {
+            url: `${SERVICE_URL}/mmr/v1/players/${playerId}/competitiveupdates?startIndex=${startIndex}&endIndex=${endIndex}&queue=${queue}`,
+            method: 'get',
+            headers: {
+                'authorization': `Bearer ${auth.access_token}`,
+                'x-riot-entitlements-jwt': auth.entitlements_token,
+            },
+        }
+
+        riotClient.request(config).then((response) => {
+            // console.log("COMPETITIVE_UPDATES ==> ")
+            console.log(JSON.stringify(response.data, null, 4))
+            resolve(response.data)
+        }).catch((err) => {
+            if (err.response.status === 404) {
+                resolve(null)
+            } else {
+                reject(err.response.status)
+            }
+        })
+    })
+}
+export async function getPlayerMMR(auth, playerId) {
+    const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_MMR")
+    // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+
+    playerId = "610ee2b8-0ad2-5fff-a819-defc284b519d"
+    console.log(auth.identity.sub, SERVICE_URL)
+
+    return new Promise((resolve, reject) => {
+        const config = {
+            url: `${SERVICE_URL}/mmr/v1/players/${auth.identity.sub}`,
+            method: 'get',
+            headers: {
+                'authorization': `Bearer ${auth.access_token}`,
+                'x-riot-entitlements-jwt': auth.entitlements_token,
+            },
+        }
+
+        riotClient.request(config).then((response) => {
+            console.log("PLAYER_MMR ==> ")
+            console.log(JSON.stringify(response.data, null, 4))
+            resolve(response.data)
+        }).catch((err) => {
+            console.log("Error", err)
+            if (err.response.status === 404) {
+                resolve(null)
             } else {
                 reject(err.response.status)
             }
