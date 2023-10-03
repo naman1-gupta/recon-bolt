@@ -1,5 +1,5 @@
 import {StatusBar} from 'expo-status-bar';
-import {StyleSheet, Text} from 'react-native';
+import {ActivityIndicator, StyleSheet} from 'react-native';
 import {useContext, useEffect, useState} from "react";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {NavigationContainer} from '@react-navigation/native';
@@ -17,14 +17,14 @@ import PlayerCareer from "./screens/PlayerCareer";
 
 const Tab = createBottomTabNavigator();
 export default function App() {
-  return (
-      <>
-          <StatusBar style={"light"}/>
-          <AuthContextProvider>
-              <Root />
-          </AuthContextProvider>
-      </>
-  );
+    return (
+        <>
+            <StatusBar style={"light"}/>
+            <AuthContextProvider>
+                <Root/>
+            </AuthContextProvider>
+        </>
+    );
 }
 
 const Root = () => {
@@ -32,41 +32,57 @@ const Root = () => {
     const [loading, setLoading] = useState(true)
     useEffect(() => {
         async function getToken() {
-            let storedToken = await AsyncStorage.getItem("auth")
-            const storedGeoInfo = await AsyncStorage.getItem("geo")
+            try {
+                console.log("Silent refresh")
+                let storedToken = await AsyncStorage.getItem("auth")
+                const storedGeoInfo = await AsyncStorage.getItem("geo")
 
-            const authToken = await getCookies({}, false)
-            const entitlementsToken = await getEntitlementsToken(authToken.access_token)
-            const userInfo = await getUserInfo(authToken.access_token)
+                console.log("Stored token", storedToken)
 
-            console.log("Stored old token", storedToken)
-
-            storedToken = JSON.stringify({
-                access_token: authToken.access_token,
-                id_token: authToken.id_token,
-                entitlements_token: entitlementsToken,
-                identity: {
-                    sub: userInfo.sub,
-                    game_name: userInfo.acct.game_name,
-                    tag_line: userInfo.acct.tag_line,
+                let authToken = await getCookies({}, false)
+                if (!authToken) {
+                    console.log("Silent login failed, logging out")
+                    authContext.logout()
+                    setLoading(false)
+                    return
                 }
-            })
 
-            console.log("Stored refreshed token", storedToken)
 
-            if (storedToken && storedGeoInfo) {
-                authContext.authenticate(JSON.parse(storedToken));
-                authContext.setGeo(JSON.parse(storedGeoInfo));
+                const entitlementsToken = await getEntitlementsToken(authToken.access_token)
+                const userInfo = await getUserInfo(authToken.access_token)
+
+                console.log("Stored old token", storedToken)
+
+                storedToken = JSON.stringify({
+                    access_token: authToken.access_token,
+                    id_token: authToken.id_token,
+                    entitlements_token: entitlementsToken,
+                    identity: {
+                        sub: userInfo.sub,
+                        game_name: userInfo.acct.game_name,
+                        tag_line: userInfo.acct.tag_line,
+                    }
+                })
+
+                console.log("Stored refreshed token", storedToken)
+
+                if (storedToken && storedGeoInfo) {
+                    authContext.authenticate(JSON.parse(storedToken));
+                    authContext.setGeo(JSON.parse(storedGeoInfo));
+                }
+
+                setLoading(false)
+            } catch (err) {
+                console.log("Error while perfomingLogin", err)
             }
 
-            setLoading(false)
         }
 
         getToken()
     }, []);
 
     if (loading) {
-        return <Text>Loading, please wait.. </Text>
+        return <ActivityIndicator size="small" color="#0000ff"/>
     }
 
     return (
@@ -93,7 +109,7 @@ const commonNavigatorStyles = {
         backgroundColor: Colors.darkBlueBg,
     },
     headerTintColor: '#ccc',
-    tabBarStyle:  {
+    tabBarStyle: {
         backgroundColor: Colors.darkBlueBg,
         borderColor: 'yellow'
     }
@@ -120,11 +136,11 @@ const AuthenticatedStack = () => {
                                                 onPress={authContext.logout}/>
     }}>
         <Tab.Screen name={"Home"} component={Home} options={{
-            tabBarIcon: ({color}) => <Ionicons name={'home'} color={color} size={24} />
+            tabBarIcon: ({color}) => <Ionicons name={'home'} color={color} size={24}/>
         }}/>
         <Tab.Screen name={"AgentSelect"}
                     component={AgentSelect}
-                    options={{ tabBarButton: () => null }} />
+                    options={{tabBarButton: () => null}}/>
         <Tab.Screen name={"LiveMatch"}
                     component={LiveMatch}
                     options={{
@@ -132,7 +148,7 @@ const AuthenticatedStack = () => {
                             <Ionicons name={"game-controller"}
                                       size={24}
                                       color={color}/>
-                    }} />
+                    }}/>
         <Tab.Screen name={"PlayerCareer"}
                     component={PlayerCareer}
                     options={{
@@ -140,7 +156,7 @@ const AuthenticatedStack = () => {
                             <Ionicons name={"game-controller"}
                                       size={24}
                                       color={color}/>
-                    }} />
+                    }}/>
     </Tab.Navigator>
 }
 

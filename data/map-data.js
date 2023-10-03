@@ -1,4 +1,4 @@
-const mapData = [
+export const mapData = [
     {
         "uuid": "7eaecc1b-4337-bbf6-6ab9-04b8f06b3319",
         "displayName": "Ascent",

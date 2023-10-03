@@ -10,6 +10,7 @@ const ENTITLEMENTS_API = 'https://entitlements.auth.riotgames.com/api/token/v1'
 const GEO_API = 'https://riot-geo.pas.si.riotgames.com/pas/v1/product/valorant'
 
 export async function userLogin(username, password) {
+    console.log("in userlogin")
     return new Promise((resolve, reject) => {
         const data = JSON.stringify({
             "username": username,
@@ -28,8 +29,10 @@ export async function userLogin(username, password) {
             },
             withCredentials: true,
         }).then(response => {
+            console.log("login response", response.data)
             resolve(parseLoginResponse(response.data.response.parameters.uri))
         }).catch(err => {
+            console.log("Error userLogin", err)
             reject(err)
         })
     })
@@ -55,8 +58,9 @@ export async function getCookies(auth, omitCredentials = false) {
             },
             withCredentials: !omitCredentials,
         }).then(async response => {
+            console.log("cookies response", response.data)
 
-            if (omitCredentials) {
+            if (response.data.type === "auth") {
                 const required_cookies = ["tdid", "asid", "clid", "__cf"]
                 const cookies = []
 
@@ -69,14 +73,20 @@ export async function getCookies(auth, omitCredentials = false) {
                     })
                 )
 
+                console.log("Clearing cookies")
                 await CookieManager.clearAll()
                 for (const cookie of cookies) {
                     let cookie_fields = cookie.split("=")
+                    console.log("cookies", cookie_fields)
                     await CookieManager.set(RIOT_AUTH, {
                         name: cookie_fields[0],
                         value: cookie_fields[1],
                     })
                 }
+
+                console.log("Resolving")
+
+                resolve(null)
             } else {
                 resolve(parseLoginResponse(response.data.response.parameters.uri))
             }

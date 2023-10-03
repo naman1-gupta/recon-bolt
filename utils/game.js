@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CurrentGame from "../mocks/CurrentGame";
+import {mockPlayerCareer} from '../mocks/PlayerCareer'
 
 const PROXY_URL = 'https://flash.namang.me/proxy?url='
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
@@ -510,9 +511,12 @@ export async function getPlayerCompetitveUpdates(auth, playerId, startIndex = 0,
             },
         }
 
+        resolve(mockPlayerCareer)
+        return
+
         riotClient.request(config).then((response) => {
             // console.log("COMPETITIVE_UPDATES ==> ")
-            console.log(JSON.stringify(response.data, null, 4))
+            // console.log(JSON.stringify(response.data, null, 4))
             resolve(response.data)
         }).catch((err) => {
             if (err.response.status === 404) {

@@ -1,11 +1,13 @@
-import {View, StyleSheet, Image, Text} from "react-native";
+import {ActivityIndicator, Image, StyleSheet, Text, View, ScrollView, Dimensions, ImageBackground} from "react-native";
 import {useRoute} from "@react-navigation/native";
 import {useContext, useEffect, useState} from "react";
-import {getPlayerCompetitveUpdates, getPlayerMMR} from "../utils/game";
+import {getPlayerCompetitveUpdates} from "../utils/game";
 import {AuthContext} from "../store/Auth";
-import {Button} from 'react-native-ui-lib';
 import rankData from "../data/rank-data";
 import mapData from '../data/map-data';
+import Colors from "../constants/Colors";
+
+const deviceWidth = Dimensions.get("window").width
 
 export default function PlayerCareer() {
     const route = useRoute();
@@ -17,54 +19,54 @@ export default function PlayerCareer() {
 
     useEffect(() => {
         getPlayerCompetitveUpdates(auth, playerId).then((response) => {
+            console.log(response)
             setCompetitiveUpdates(response)
         })
     }, []);
 
-    const getMMR = () => {
-        getPlayerMMR(auth, playerId).then((response) => {
-            console.log("Success", response)
-        })
-    }
-
-
     const getRankBadge = () => {
-        const competitveTier = rankData.tiers.find(tier =>
+        return rankData.tiers.find(tier =>
             tier.tier === competitiveUpdates.Matches[0].TierAfterUpdate)
-
-        return competitveTier
     }
 
     if (competitiveUpdates) {
         return (
             <View style={styles.screen}>
                 <View style={styles.rankBadgeContainer}>
-                    <Image style={{height: 100, width: 100}} source={{uri: getRankBadge().largeIcon}}/>
-                    <Text>{getRankBadge().tierName}</Text>
-
-                    <Button label={"GetMMR"} onPress={getMMR} />
+                    <Image style={styles.rankBadge} source={{uri: getRankBadge().largeIcon}}/>
+                    <Text style={styles.rankText}>{getRankBadge().tierName}</Text>
                 </View>
 
-                <View>
+                <ScrollView contentContainerStyle={styles.matchesContainer}>
                     {
                         competitiveUpdates.Matches.map(match => {
                             const mapDetails = mapData.find(map => map.mapUrl === match.MapID)
                             return (
                                 <>
                                     <View style={styles.matchContainer}>
-                                        <Text>{mapDetails.displayName}</Text>
-                                        <Text>{match.RankedRatingEarned}</Text>
+                                        <ImageBackground style={styles.matchMapBackgroundImage} source={{uri: mapDetails.listViewIcon}} >
+                                            <View style={styles.matchDetailsContainer}>
+                                                <Text style={styles.mapResultsText}>{mapDetails.displayName}</Text>
+                                                <Text style={[
+                                                    styles.mapResultsText,
+                                                    match.RankedRatingEarned >= 0 ? styles.greenText : styles.redText
+                                                ]}>
+                                                    {match.RankedRatingEarned}
+                                                </Text>
+                                            </View>
+
+                                        </ImageBackground>
                                     </View>
                                 </>
                             )
                         })
                     }
-                </View>
+                </ScrollView>
             </View>
         )
     } else {
         return <View style={styles.screen}>
-
+            <ActivityIndicator size="small" color="#0000ff"/>
         </View>
     }
 
@@ -74,14 +76,57 @@ export default function PlayerCareer() {
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        alignItems: 'center'
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: Colors.darkBlueBg
     },
     rankBadgeContainer: {
-        flex: 1,
         alignItems: "center",
+        width: "100%",
+    },
+    matchesContainer: {
+        alignItems: "center",
+        width: deviceWidth,
+        justifyContent: "center",
+        padding: 12,
+        borderWidth: 1,
+        borderColor: "white",
+    },
+    matchMapBackgroundImage: {
+        flex: 1,
+        opacity: 0.6
     },
     matchContainer: {
-        backgroundColor: 'red',
-        flexDirection: "row"
+        width: "80%",
+        marginVertical: 4,
+        flexDirection: "row",
+        height: 40,
+        borderColor: 'white',
+        borderWidth: 1,
+    },
+    matchDetailsContainer: {
+        padding: 8,
+        flexDirection: "row",
+        justifyContent: "space-between"
+    },
+    rankBadge: {
+        height: 100,
+        width: 100,
+        marginVertical: 4
+    },
+    rankText: {
+        fontWeight: "700",
+        color: 'white',
+    },
+    mapResultsText: {
+        fontWeight: "900",
+        color: "white",
+        elevation: 1,
+    },
+    greenText: {
+        color: Colors.positiveGreen
+    },
+    redText: {
+        color: Colors.negativeRed
     }
 })

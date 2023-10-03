@@ -5,7 +5,7 @@ import {
     getPlayerCompetitveUpdates,
     getPlayerNames
 } from "../utils/game";
-import {useRoute} from "@react-navigation/native";
+import {useNavigation, useRoute} from "@react-navigation/native";
 import {useContext, useEffect, useState} from "react";
 import {Button, Card} from "react-native-ui-lib";
 import {agentData} from "../data/agent-data";
@@ -25,6 +25,7 @@ const LiveMatch = () => {
     const [playerDetails, setPlayerDetails] = useState({})
     const [isLoading, setIsLoading] = useState(true)
     const {auth} = useContext(AuthContext)
+    const navigation = useNavigation();
 
     const getGameDetails = () => {
         console.log(currentMatchId)
@@ -66,7 +67,10 @@ const LiveMatch = () => {
 
             new Promise.all(playerIds.map(playerId => getPlayerCompetitveUpdates(auth, playerId,  0, 1))).then(
                 response => {
-                    response.forEach(res => details[res['Subject']]["Rank"] = res["Matches"].length === 0 ? res["Matches"][0].TierAfterUpdate : 0)
+                    response.forEach(res => {
+                        // console.log("PLAYER_RANK", res['Matches'][0]["TierAfterUpdate"], res["Matches"].length, res["Matches"].length === 0 ? res["Matches"][0]["TierAfterUpdate"] : 0)
+                        details[res['Subject']]["Rank"] = res["Matches"].length !== 0 ? res["Matches"][0]["TierAfterUpdate"] : 0
+                    })
 
                     setPlayerDetails(details)
 
@@ -84,9 +88,11 @@ const LiveMatch = () => {
 
     }, [matchDetails]);
 
-
-
-
+    const getPlayerCareer = (subject) => {
+        navigation.navigate("PlayerCareer", {
+            playerId: subject
+        })
+    }
 
     return (
         <View style={styles.screen}>
@@ -98,7 +104,11 @@ const LiveMatch = () => {
                     <View>
                         {blueTeamPlayers.map(
                             player => (
-                                <Agent player={player} playerDetails={playerDetails} containerStyle={"ally"}/>
+                                <Agent player={player}
+                                       playerDetails={playerDetails}
+                                       containerStyle={"ally"}
+                                       onPress={getPlayerCareer}
+                                />
                             )
                         )}
                     </View>
@@ -106,7 +116,11 @@ const LiveMatch = () => {
 
                         {redTeamPlayers.map(
                             player => (
-                                <Agent player={player} playerDetails={playerDetails} containerStyle={"enemy"}/>
+                                <Agent player={player}
+                                       playerDetails={playerDetails}
+                                       containerStyle={"enemy"}
+                                       onPress={getPlayerCareer}
+                                />
                             ))}
                     </View>
                 </ScrollView>
