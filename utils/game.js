@@ -24,6 +24,16 @@ riotClient.interceptors.request.use((config) => {
 })
 
 
+riotClient.interceptors.response.use((response) => {
+    return response
+}, (error) => {
+    if(error.response.status !== 404) {
+        console.log("ERROR ===> ", error.response.headers)
+    }
+    return Promise.reject(error)
+})
+
+
 const SERVICE_URLS = [
     "SERVICEURL_MATCHDETAILS",
     "SERVICEURL_NAME",
@@ -75,10 +85,12 @@ export async function getConfig(auth, geo) {
         }
 
         axios.request(config).then((response) => {
-            // console.log("Configs", response.data)
+            console.log("Configs", response.data)
+
             const promises = []
             Object.keys(response.data['Collapsed']).forEach((k) => {
                 if (k.startsWith("SERVICEURL")) {
+                    console.log(k)
                     promises.push(AsyncStorage.setItem(k, response.data['Collapsed'][k]))
                 }
             })
@@ -234,6 +246,8 @@ export async function startMatchmaking(auth, partyId) {
 export async function getPreGamePlayerStatus(auth) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PREGAME")
     // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
+
+    console.log("AUTH_CONTEXT", auth)
     const PLAYER_ID = auth.identity.sub;
 
 
@@ -511,14 +525,12 @@ export async function getPlayerCompetitveUpdates(auth, playerId, startIndex = 0,
             },
         }
 
-        setTimeout(() => {
-            resolve(mockPlayerCareer)
-        }, 1000)
-        return
+        // setTimeout(() => {
+        //     resolve(mockPlayerCareer)
+        // }, 1000)
+        // return
 
         riotClient.request(config).then((response) => {
-            // console.log("COMPETITIVE_UPDATES ==> ")
-            // console.log(JSON.stringify(response.data, null, 4))
             resolve(response.data)
         }).catch((err) => {
             if (err.response.status === 404) {

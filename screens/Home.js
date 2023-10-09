@@ -1,5 +1,5 @@
 import {ScrollView, StyleSheet, View, Text, Pressable, Alert} from "react-native";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useState, useCallback} from "react";
 import {
     getConfig,
     getPartyDetails,
@@ -8,7 +8,7 @@ import {
     getPreGamePlayerStatus, leaveMatchmaking, startMatchmaking,
     switchQueue
 } from "../utils/game";
-import {useNavigation} from "@react-navigation/native";
+import {useFocusEffect, useNavigation} from "@react-navigation/native";
 import {Ionicons} from "@expo/vector-icons";
 import {Picker, Button, Gradient} from 'react-native-ui-lib';
 import Animated, {
@@ -46,11 +46,19 @@ const Home = () => {
 
     const navigation = useNavigation()
 
-    useEffect(() => {
+    useFocusEffect(useCallback(() => {
         getConfig(auth, geo).then((response) => {
             getPlayerPartyId(auth).then(partyId => {
                 console.log("PartyId", partyId)
                 setPartyId(partyId)
+                getPartyDetails(auth, partyId)
+                    .then(details => {
+                        setPartyDetails(details)
+                    })
+                    .catch(_ => {
+                        Alert.alert("Error", "Error fetching party details")
+                    })
+
             }).catch(err => {
                 console.log("Error getting party id")
             })
@@ -60,25 +68,26 @@ const Home = () => {
         }).finally(() => setLoading(false))
 
         console.log("HOME", auth)
-    }, []);
+    }, [partyId]));
+
+
+    // useEffect(() => {
+    //     console.log("Getting party details")
+    //     getPartyDetails(auth, partyId)
+    //         .then(details => {
+    //             setPartyDetails(details)
+    //         })
+    //         .catch(_ => {
+    //             Alert.alert("Error", "Error fetching party details")
+    //         })
+    //
+    // }, [partyId]);
 
 
     useEffect(() => {
-        console.log("Getting party details")
-        getPartyDetails(auth, partyId)
-            .then(details => {
-                setPartyDetails(details)
-            })
-            .catch(_ => {
-                Alert.alert("Error", "Error fetching party details")
-            })
-
-    }, [partyId]);
-
-
-    useEffect(() => {
+        console.log("PARTY_DETAILS", partyDetails)
         if (partyDetails.state === "DEFAULT" && partyDetails.previousState === "MATCHMADE_GAME_STARTING") {
-            getPreGamePlayerStatus().then(({matchId}) => setMatchId(matchId))
+            getPreGamePlayerStatus(auth).then(({matchId}) => setMatchId(matchId))
         }
     }, [partyDetails]);
 
@@ -156,7 +165,7 @@ const Home = () => {
 
     return (
             <View style={styles.screen}>
-                <LinearGradient colors={[Colors.darkBlueBg, Colors.inactiveGoldTint]}>
+                <LinearGradient style={styles.gradientContainer} colors={[Colors.darkBlueBg, Colors.inactiveGoldTint]}>
                 <View style={styles.partyContainer}>
                     <Text
                         style={styles.partyTitleText}>Hi, {`${auth.identity?.game_name}#${auth.identity?.tag_line}`}</Text>
@@ -225,12 +234,15 @@ const Home = () => {
 
 
 const styles = StyleSheet.create({
+    gradientContainer: {
+        flex: 1,
+        paddingHorizontal: 12,
+        paddingVertical: 16,
+    },
     screen: {
         flex: 1,
         backgroundColor: Colors.darkBlueBg,
         alignContent: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 16,
     },
     partyContainer: {
         flexDirection: 'row',

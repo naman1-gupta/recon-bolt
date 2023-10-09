@@ -11,9 +11,10 @@ import AgentSelect from "./screens/AgentSelect";
 import LiveMatch from "./screens/LiveMatch";
 import Colors from "./constants/Colors";
 import Login from './screens/Login';
-import {getCookies, getEntitlementsToken, getUserInfo} from "./utils/login";
+import {getCookies, getEntitlementsToken, getGeoInfo, getUserInfo} from "./utils/login";
 import PlayerCareer from "./screens/PlayerCareer";
 import {screens} from "./constants/Screens";
+import {getConfig} from "./utils/game";
 
 
 const Tab = createBottomTabNavigator();
@@ -36,7 +37,6 @@ const Root = () => {
             try {
                 console.log("Silent refresh")
                 let storedToken = await AsyncStorage.getItem("auth")
-                const storedGeoInfo = await AsyncStorage.getItem("geo")
 
                 console.log("Stored token", storedToken)
 
@@ -51,6 +51,9 @@ const Root = () => {
 
                 const entitlementsToken = await getEntitlementsToken(authToken.access_token)
                 const userInfo = await getUserInfo(authToken.access_token)
+                await getGeoInfo(authToken.access_token, authToken.id_token)
+                const storedGeoInfo = await AsyncStorage.getItem("geo")
+
 
                 console.log("Stored old token", storedToken)
 

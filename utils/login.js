@@ -9,6 +9,14 @@ const USERINFO = 'https://auth.riotgames.com/userinfo'
 const ENTITLEMENTS_API = 'https://entitlements.auth.riotgames.com/api/token/v1'
 const GEO_API = 'https://riot-geo.pas.si.riotgames.com/pas/v1/product/valorant'
 
+
+axios.interceptors.response.use((response) => {
+    return response
+}, (error) => {
+    console.log("Request errored", error)
+    return Promise.reject(error)
+})
+
 export async function userLogin(username, password) {
     console.log("in userlogin")
     return new Promise((resolve, reject) => {

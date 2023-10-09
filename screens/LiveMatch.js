@@ -5,7 +5,7 @@ import {
     getPlayerCompetitveUpdates,
     getPlayerNames
 } from "../utils/game";
-import {useNavigation, useRoute} from "@react-navigation/native";
+import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {useContext, useEffect, useState} from "react";
 import {Button, Card} from "react-native-ui-lib";
 import {agentData} from "../data/agent-data";
@@ -45,7 +45,7 @@ const LiveMatch = () => {
         })
     }
 
-    useEffect(() => {
+    useFocusEffect(() => {
         console.log("Route matchID: ", matchId)
         if (matchId) {
             setCurrentMatchId(matchId)
@@ -55,7 +55,7 @@ const LiveMatch = () => {
                 setCurrentMatchId(response.matchId)
             })
         }
-    }, []);
+    });
 
     useEffect(() => {
         console.log("MatchDetails", matchDetails)
@@ -112,7 +112,7 @@ const LiveMatch = () => {
                         <View>
                             {blueTeamPlayers.map(
                                 (player, index) => (
-                                    <Agent key={`blue_${index}`}
+                                    <Agent agentKey={`blue_${index}`}
                                            player={player}
                                            playerDetails={playerDetails}
                                            containerStyle={"ally"}
@@ -125,7 +125,7 @@ const LiveMatch = () => {
 
                             {redTeamPlayers.map(
                                 (player, index) => (
-                                    <Agent key={`red_${index}`}
+                                    <Agent agentKey={`red_${index}`}
                                            player={player}
                                            playerDetails={playerDetails}
                                            containerStyle={"enemy"}
