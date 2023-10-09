@@ -39,11 +39,11 @@ export default function PlayerCareer() {
 
                 <ScrollView contentContainerStyle={styles.matchesContainer}>
                     {
-                        competitiveUpdates.Matches.map(match => {
+                        competitiveUpdates.Matches.map((match, index) => {
                             const mapDetails = mapData.find(map => map.mapUrl === match.MapID)
                             return (
                                 <>
-                                    <View style={styles.matchContainer}>
+                                    <View key={`match_${index}`} style={styles.matchContainer}>
                                         <ImageBackground style={styles.matchMapBackgroundImage} source={{uri: mapDetails.listViewIcon}} >
                                             <View style={styles.matchDetailsContainer}>
                                                 <Text style={styles.mapResultsText}>{mapDetails.displayName}</Text>
@@ -66,7 +66,7 @@ export default function PlayerCareer() {
         )
     } else {
         return <View style={styles.screen}>
-            <ActivityIndicator size="small" color="#0000ff"/>
+            <ActivityIndicator size="large" color={Colors.inactiveGoldTint}/>
         </View>
     }
 

@@ -511,7 +511,9 @@ export async function getPlayerCompetitveUpdates(auth, playerId, startIndex = 0,
             },
         }
 
-        resolve(mockPlayerCareer)
+        setTimeout(() => {
+            resolve(mockPlayerCareer)
+        }, 1000)
         return
 
         riotClient.request(config).then((response) => {

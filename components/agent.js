@@ -7,12 +7,12 @@ import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
 
 export default function Agent(props) {
-    const {player, playerDetails, containerStyle, onPress} = props
+    const {player, playerDetails, containerStyle, onPress, key} = props
     const {auth} = useContext(AuthContext);
 
 
     return (
-        <Card
+        <Card key={key}
             style={[styles.playerContainer, containerStyle === "enemy" ? styles.enemyPlayerContainer : styles.allyPlayerContainer]}
             flex row
             onPress={onPress.bind(this, player["Subject"])}>

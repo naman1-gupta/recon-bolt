@@ -5,6 +5,7 @@ import {useContext, useEffect, useState} from "react";
 import Button from 'react-native-ui-lib/button'
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
+import {screens} from "../constants/Screens";
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -62,7 +63,7 @@ function AgentSelect({route, navigation}) {
                 getCoreGamePlayerStatus(auth).then(response => {
                     clearInterval(timer)
 
-                    navigation.navigate("LiveMatch", {matchId: matchId})
+                    navigation.navigate(screens.LIVE_MATCH, {matchId: matchId})
                 })
             }, 2000)
             console.log("Agent lock response", response)

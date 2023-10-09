@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, Text, View} from 'react-native'
+import {RefreshControl, ScrollView, StyleSheet, Text, View} from 'react-native'
 import {
     getCoreGamePlayerStatus,
     getCurrentGameDetails,
@@ -13,6 +13,7 @@ import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
 import Agent from "../components/agent";
 import {combineTransition} from "react-native-reanimated";
+import {screens} from "../constants/Screens";
 
 
 const LiveMatch = () => {
@@ -26,16 +27,21 @@ const LiveMatch = () => {
     const [isLoading, setIsLoading] = useState(true)
     const {auth} = useContext(AuthContext)
     const navigation = useNavigation();
+    const [refreshing, setRefreshing] = useState(false);
 
     const getGameDetails = () => {
+        setRefreshing(true)
         console.log(currentMatchId)
-        if (!currentMatchId){
+        if (!currentMatchId) {
+            setRefreshing(false)
             return
         }
 
         console.log("Requesting match details for matchId:", currentMatchId)
         getCurrentGameDetails(auth, currentMatchId).then(response => {
             setMatchDetails(response)
+        }).finally(() => {
+            setRefreshing(false)
         })
     }
 
@@ -65,7 +71,7 @@ const LiveMatch = () => {
                 details[player['Subject']] = player
             })
 
-            new Promise.all(playerIds.map(playerId => getPlayerCompetitveUpdates(auth, playerId,  0, 1))).then(
+            new Promise.all(playerIds.map(playerId => getPlayerCompetitveUpdates(auth, playerId, 0, 1))).then(
                 response => {
                     response.forEach(res => {
                         // console.log("PLAYER_RANK", res['Matches'][0]["TierAfterUpdate"], res["Matches"].length, res["Matches"].length === 0 ? res["Matches"][0]["TierAfterUpdate"] : 0)
@@ -89,42 +95,50 @@ const LiveMatch = () => {
     }, [matchDetails]);
 
     const getPlayerCareer = (subject) => {
-        navigation.navigate("PlayerCareer", {
+        navigation.navigate(screens.PLAYER_CAREER, {
             playerId: subject
         })
     }
 
     return (
         <View style={styles.screen}>
-            <Button label={"Get Match Details"} onPress={getGameDetails}/>
-            <Text>Live Match</Text>
-            {
-                !isLoading &&
-                <ScrollView style={styles.scrollViewContainer}>
-                    <View>
-                        {blueTeamPlayers.map(
-                            player => (
-                                <Agent player={player}
-                                       playerDetails={playerDetails}
-                                       containerStyle={"ally"}
-                                       onPress={getPlayerCareer}
-                                />
-                            )
-                        )}
-                    </View>
-                    <View>
+            <ScrollView style={styles.scrollViewContainer}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={getGameDetails}/>
+                        }>
+                {
+                    !isLoading &&
+                    <>
+                        <View>
+                            {blueTeamPlayers.map(
+                                (player, index) => (
+                                    <Agent key={`blue_${index}`}
+                                           player={player}
+                                           playerDetails={playerDetails}
+                                           containerStyle={"ally"}
+                                           onPress={getPlayerCareer}
+                                    />
+                                )
+                            )}
+                        </View>
+                        <View>
 
-                        {redTeamPlayers.map(
-                            player => (
-                                <Agent player={player}
-                                       playerDetails={playerDetails}
-                                       containerStyle={"enemy"}
-                                       onPress={getPlayerCareer}
-                                />
-                            ))}
-                    </View>
-                </ScrollView>
-            }
+                            {redTeamPlayers.map(
+                                (player, index) => (
+                                    <Agent key={`red_${index}`}
+                                           player={player}
+                                           playerDetails={playerDetails}
+                                           containerStyle={"enemy"}
+                                           onPress={getPlayerCareer}
+                                    />
+                                )
+                            )}
+                        </View>
+                    </>
+
+                }
+
+            </ScrollView>
 
         </View>
     );
@@ -135,7 +149,7 @@ export default LiveMatch;
 
 const styles = StyleSheet.create({
     screen: {
-        backgroundColor: 'blue',
+        backgroundColor: Colors.darkBlueBg,
         flex: 1,
         justifyContent: 'flex-start',
         alignItems: 'center'

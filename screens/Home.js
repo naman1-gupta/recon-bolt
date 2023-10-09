@@ -1,4 +1,4 @@
-import {ScrollView, StyleSheet, View, Text, Pressable} from "react-native";
+import {ScrollView, StyleSheet, View, Text, Pressable, Alert} from "react-native";
 import {useContext, useEffect, useState} from "react";
 import {
     getConfig,
@@ -10,7 +10,7 @@ import {
 } from "../utils/game";
 import {useNavigation} from "@react-navigation/native";
 import {Ionicons} from "@expo/vector-icons";
-import {Picker, Button} from 'react-native-ui-lib';
+import {Picker, Button, Gradient} from 'react-native-ui-lib';
 import Animated, {
     interpolate,
     RotateInDownLeft,
@@ -21,6 +21,8 @@ import Animated, {
 
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
+import {screens} from "../constants/Screens";
+import {LinearGradient} from "expo-linear-gradient";
 
 const QUEUE_TYPES = {
     'swiftplay': 'Swiftplay',
@@ -62,18 +64,15 @@ const Home = () => {
 
 
     useEffect(() => {
-        console.log("Running after updating")
-        // const timer = setInterval(() => {
+        console.log("Getting party details")
         getPartyDetails(auth, partyId)
             .then(details => {
                 setPartyDetails(details)
             })
             .catch(_ => {
-                // Alert.alert("Error", "Error fetching party details")
+                Alert.alert("Error", "Error fetching party details")
             })
-        // }, 10000)
 
-        // return () => clearInterval(timer)
     }, [partyId]);
 
 
@@ -89,7 +88,7 @@ const Home = () => {
         getPreGameMatchStatus(auth, matchId).then(response => {
             console.log("pregame status, navigating", response, matchId)
             if ("AllyTeam" in response) {
-                navigation.navigate("AgentSelect", {
+                navigation.navigate(screens.AGENT_SELECT, {
                     matchId: matchId
                 })
             }
@@ -156,69 +155,71 @@ const Home = () => {
     // }
 
     return (
-        <ScrollView style={styles.screen}>
-            <View style={styles.partyContainer}>
-                <Text
-                    style={styles.partyTitleText}>Hi, {`${auth.identity?.game_name}#${auth.identity?.tag_line}`}</Text>
-                <Pressable onPress={refresh} style={({pressed}) => [pressed && styles.reduceOpacity]}>
-                    <Animated.View style={[]}>
-                        <Ionicons name={"refresh"} size={24} color={'white'}
-                                  entering={RotateInDownLeft.duration(3000)}/>
-                    </Animated.View>
-                </Pressable>
-            </View>
-            <View>
-                <View style={styles.queueContainer}>
-                    <Picker
-                        containerStyle={{
-                            backgroundColor: !partyDetails?.queueId ? '#f6d9d9' : '#ccc',
-                            borderColor: '#ccc',
-                            borderRadius: 6,
-                            borderWidth: 1,
-                            flexDirection: 'row',
-                            marginVertical: 16,
-                            paddingVertical: 8,
-                            paddingHorizontal: 8,
-                        }}
-                        editable={!!partyDetails?.queueId}
-                        placeholder={partyDetails?.queueId ? "Select an option" : "Start your game"}
-                        useSafeArea={true}
-                        onChange={(queue) => changeQueue(queue)}
-                        value={partyDetails?.queueId}
-                    >
-                        {
-                            Object.keys(QUEUE_TYPES)
-                                .map(queue => <Picker.Item
-                                    value={queue}
-                                    label={QUEUE_TYPES[queue]}
-                                    key={queue}
-                                />)
-                        }
-                    </Picker>
-                    <View style={{minHeight: 40, flexDirection: 'row', alignItems: 'center'}}>
-                        {
-                            partyDetails.queueId !== null ? (
-                                <>
-                                    <Text style={[styles.currentQueueLabel]}>Current</Text>
-                                    <Text style={[styles.currentQueueText]}>{QUEUE_TYPES[partyDetails.queueId]}</Text>
-                                </>
-                            ) : null
-                        }
+            <View style={styles.screen}>
+                <LinearGradient colors={[Colors.darkBlueBg, Colors.inactiveGoldTint]}>
+                <View style={styles.partyContainer}>
+                    <Text
+                        style={styles.partyTitleText}>Hi, {`${auth.identity?.game_name}#${auth.identity?.tag_line}`}</Text>
+                    <Pressable onPress={refresh} style={({pressed}) => [pressed && styles.reduceOpacity]}>
+                        <Animated.View style={[]}>
+                            <Ionicons name={"refresh"} size={24} color={'white'}
+                                      entering={RotateInDownLeft.duration(3000)}/>
+                        </Animated.View>
+                    </Pressable>
+                </View>
+                <View>
+                    <View style={styles.queueContainer}>
+                        <Picker
+                            containerStyle={{
+                                backgroundColor: !partyDetails?.queueId ? '#f6d9d9' : '#ccc',
+                                borderColor: '#ccc',
+                                borderRadius: 6,
+                                borderWidth: 1,
+                                flexDirection: 'row',
+                                marginVertical: 16,
+                                paddingVertical: 8,
+                                paddingHorizontal: 8,
+                            }}
+                            editable={!!partyDetails?.queueId}
+                            placeholder={partyDetails?.queueId ? "Select an option" : "Start your game"}
+                            useSafeArea={true}
+                            onChange={(queue) => changeQueue(queue)}
+                            value={partyDetails?.queueId}
+                        >
+                            {
+                                Object.keys(QUEUE_TYPES)
+                                    .map(queue => <Picker.Item
+                                        value={queue}
+                                        label={QUEUE_TYPES[queue]}
+                                        key={queue}
+                                    />)
+                            }
+                        </Picker>
+                        <View style={{minHeight: 40, flexDirection: 'row', alignItems: 'center'}}>
+                            {
+                                partyDetails.queueId !== null ? (
+                                    <>
+                                        <Text style={[styles.currentQueueLabel]}>Current</Text>
+                                        <Text
+                                            style={[styles.currentQueueText]}>{QUEUE_TYPES[partyDetails.queueId]}</Text>
+                                    </>
+                                ) : null
+                            }
+                        </View>
+
                     </View>
+                    {
+                        partyDetails.state !== "MATCHMAKING" &&
+                        <Button label={`Start matchmaking`} onPress={queueMatch}/>
+                    }
+                    {
+                        partyDetails.state === "MATCHMAKING" &&
+                        <Button label={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>
+                    }
 
                 </View>
-                {
-                    partyDetails.state !== "MATCHMAKING" && <Button label={`Start matchmaking`} onPress={queueMatch}/>
-                }
-                {
-                    partyDetails.state === "MATCHMAKING" &&
-                    <Button label={`Cancel matchmaking`} onPress={leaveMatchmakingQueue}/>
-                }
-
+                </LinearGradient>
             </View>
-
-
-        </ScrollView>
     )
 }
 

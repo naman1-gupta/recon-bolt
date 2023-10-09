@@ -1,5 +1,5 @@
 import {StatusBar} from 'expo-status-bar';
-import {ActivityIndicator, StyleSheet} from 'react-native';
+import {ActivityIndicator, StyleSheet, View} from 'react-native';
 import {useContext, useEffect, useState} from "react";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
 import {NavigationContainer} from '@react-navigation/native';
@@ -13,6 +13,7 @@ import Colors from "./constants/Colors";
 import Login from './screens/Login';
 import {getCookies, getEntitlementsToken, getUserInfo} from "./utils/login";
 import PlayerCareer from "./screens/PlayerCareer";
+import {screens} from "./constants/Screens";
 
 
 const Tab = createBottomTabNavigator();
@@ -82,7 +83,9 @@ const Root = () => {
     }, []);
 
     if (loading) {
-        return <ActivityIndicator size="small" color="#0000ff"/>
+        return <View style={styles.container}>
+            <ActivityIndicator size="large" color={Colors.activeGoldTint} />
+        </View>
     }
 
     return (
@@ -127,21 +130,16 @@ const AuthenticatedStack = () => {
     const authContext = useContext(AuthContext)
     return <Tab.Navigator screenOptions={{
         ...commonNavigatorStyles,
-        headerLeft: ({tintColor}) => <Ionicons name={'document'} size={24} color={tintColor}
-                                               onPress={() => {
-                                                   console.log(authContext.geo);
-                                                   console.log(authContext.auth)
-                                               }}/>,
         headerRight: ({tintColor}) => <Ionicons name={'log-out'} color={tintColor} size={24}
                                                 onPress={authContext.logout}/>
     }}>
-        <Tab.Screen name={"Home"} component={Home} options={{
+        <Tab.Screen name={screens.PARTY_HOME} component={Home} options={{
             tabBarIcon: ({color}) => <Ionicons name={'home'} color={color} size={24}/>
         }}/>
-        <Tab.Screen name={"AgentSelect"}
+        <Tab.Screen name={screens.AGENT_SELECT}
                     component={AgentSelect}
                     options={{tabBarButton: () => null}}/>
-        <Tab.Screen name={"LiveMatch"}
+        <Tab.Screen name={screens.LIVE_MATCH}
                     component={LiveMatch}
                     options={{
                         tabBarIcon: ({color}) =>
@@ -149,7 +147,7 @@ const AuthenticatedStack = () => {
                                       size={24}
                                       color={color}/>
                     }}/>
-        <Tab.Screen name={"PlayerCareer"}
+        <Tab.Screen name={screens.PLAYER_CAREER}
                     component={PlayerCareer}
                     options={{
                         tabBarIcon: ({color}) =>
@@ -163,7 +161,6 @@ const AuthenticatedStack = () => {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: Colors.darkBlueBg,
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
