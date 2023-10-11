@@ -1,4 +1,4 @@
-import {Alert, Dimensions, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {Alert, Dimensions, FlatList, Image, Pressable, ScrollView, StyleSheet, View} from 'react-native';
 import {agentData} from "../data/agent-data";
 import {
     getCoreGamePlayerStatus,
@@ -54,17 +54,17 @@ function AgentSelect({route, navigation}) {
             setAgentSelection(response)
         })
 
-        const timer = setInterval( () => {
-                console.log("Querying agent select status")
-                getPreGameMatchStatus(auth, matchId).then(response => {
-                    // console.log(JSON.stringify(response, null, 4))
-                    if(Object.keys(response).length === 0){
-                        console.log("Clearing interval")
-                        clearInterval(timer)
-                    }
+        const timer = setInterval(() => {
+            console.log("Querying agent select status")
+            getPreGameMatchStatus(auth, matchId).then(response => {
+                // console.log(JSON.stringify(response, null, 4))
+                if (Object.keys(response).length === 0) {
+                    console.log("Clearing interval")
+                    clearInterval(timer)
+                }
 
-                    setAgentSelection(response)
-                }).catch(err => Alert.alert("Error fetching players"))
+                setAgentSelection(response)
+            }).catch(err => Alert.alert("Error fetching players"))
         }, 2000)
         clearInterval(timer)
 
@@ -89,7 +89,7 @@ function AgentSelect({route, navigation}) {
             const timer = setInterval(() => {
                 getCoreGamePlayerStatus(auth).then(response => {
                     console.log("CORE_GAME_RESPONSE", response)
-                    if(Object.keys(response).length === 0) {
+                    if (Object.keys(response).length === 0) {
                         return
                     }
                     clearInterval(timer)
@@ -107,7 +107,7 @@ function AgentSelect({route, navigation}) {
 
     return (
         <View style={styles.mainScreen}>
-            <View>
+            <View style={styles.agentSelectContainer}>
                 <FlatList extraData={agent} style={styles.agentList} numColumns={cols} data={playableAgents}
                           renderItem={({item}) => {
                               return (
@@ -124,8 +124,6 @@ function AgentSelect({route, navigation}) {
                                   </Pressable>
                               )
                           }}/>
-            </View>
-            <View>
                 <Button label={"Confirm"} onPress={onAgentLocked} disabled={agentLocked}/>
             </View>
 
@@ -133,7 +131,7 @@ function AgentSelect({route, navigation}) {
                 {
                     agentSelection &&
                     agentSelection["AllyTeam"]["Players"].map((player, index) =>
-                    <Agent player={player} showRank={false} onPress={(s) => console.log(s)} agentKey={index}/>)
+                        <Agent player={player} showRank={false} onPress={(s) => console.log(s)} agentKey={index}/>)
                 }
             </ScrollView>
         </View>
@@ -141,6 +139,12 @@ function AgentSelect({route, navigation}) {
 }
 
 const styles = StyleSheet.create({
+    agentSelectContainer: {
+        flexDirection: "column",
+        justifyContent: "space-around",
+        height: '50%',
+        paddingVertical: 24
+    },
     mainScreen: {
         flex: 1,
         justifyContent: "center",
@@ -149,9 +153,10 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.darkBlueBg,
     },
     agentList: {
-        maxHeight: 350
+        maxHeight: '80%',
     },
     agent: {
+        backgroundColor: Colors.inactiveGoldTint,
         flexDirection: 'column',
         margin: 2,
         width: 50,
@@ -166,7 +171,7 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     agentDisabled: {
-        backgroundColor: 'black',
+        backgroundColor: Colors.inactiveGoldTint,
         opacity: 0.5,
     },
     agentSelected: {

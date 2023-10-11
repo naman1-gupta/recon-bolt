@@ -4,6 +4,7 @@ const Colors = {
     enemyTeam: '#d56464',
     activeGoldTint: '#f5bf0d',
     inactiveGoldTint: '#6b5303',
+    selfColor: '#a48e69',
     positiveGreen: '#33ff00',
     negativeRed: '#ff0000'
 }

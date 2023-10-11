@@ -31,7 +31,11 @@ export default function Agent(props) {
 
     return (
         <Card key={agentKey}
-            style={[styles.playerContainer, player["TeamID"] === "Red" ? styles.enemyPlayerContainer : styles.allyPlayerContainer]}
+            style={[
+                styles.playerContainer,
+                player["TeamID"] === "Red" ? styles.enemyPlayerContainer : styles.allyPlayerContainer,
+                auth.identity.sub === player["Subject"] ? styles.selfPlayerContainer : null
+            ]}
             flex row
             onPress={onPress.bind(this, player["Subject"])}>
             <View style={styles.gameBoardRow}>
@@ -97,6 +101,9 @@ const styles = StyleSheet.create({
     playerContainer: {
         borderRadius: 100,
         marginVertical: 4,
+    },
+    selfPlayerContainer: {
+      backgroundColor: Colors.selfColor,
     },
     allyPlayerContainer: {
         backgroundColor: Colors.allyTeam,
