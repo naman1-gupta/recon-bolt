@@ -50,9 +50,9 @@ function AgentSelect({route, navigation}) {
             setIsLoading(false)
         })
 
-        getPreGameMatchStatus(auth, matchId).then(response => {
-            setAgentSelection(response)
-        })
+        // getPreGameMatchStatus(auth, matchId).then(response => {
+        //     setAgentSelection(response)
+        // })
 
         const timer = setInterval(() => {
             console.log("Querying agent select status")
@@ -66,7 +66,7 @@ function AgentSelect({route, navigation}) {
                 setAgentSelection(response)
             }).catch(err => Alert.alert("Error fetching players"))
         }, 2000)
-        clearInterval(timer)
+        // clearInterval(timer)
 
     }, []);
 

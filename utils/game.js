@@ -323,8 +323,8 @@ export async function getPreGameMatchStatus(auth, matchId) {
             }
         }
 
-        resolve(AgentSelectMock)
-        return
+        // resolve(AgentSelectMock)
+        // return
 
         riotClient.request(config).then((response) => {
             resolve(response.data)

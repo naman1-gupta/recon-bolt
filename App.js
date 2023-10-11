@@ -157,7 +157,8 @@ const AuthenticatedStack = () => {
                             <Ionicons name={"game-controller"}
                                       size={24}
                                       color={color}/>
-                    }}/>
+                    }}
+        />
     </Tab.Navigator>
 }
 

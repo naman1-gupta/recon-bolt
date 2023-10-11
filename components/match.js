@@ -3,7 +3,7 @@ import mapData from "../data/map-data";
 import Colors from "../constants/Colors";
 
 const match = (props) => {
-    const {matchDetails, key} = props
+    const {matchDetails} = props
     const mapDetails = mapData.find(map => map.mapUrl === matchDetails.MapID)
 
     return (

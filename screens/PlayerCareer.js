@@ -1,5 +1,5 @@
 import {ActivityIndicator, Alert, Dimensions, Image, ScrollView, StyleSheet, Text, View} from "react-native";
-import {useFocusEffect, useRoute} from "@react-navigation/native";
+import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {useCallback, useContext, useState} from "react";
 import {getPlayerCompetitveUpdates} from "../utils/game";
 import {AuthContext} from "../store/Auth";
@@ -13,11 +13,17 @@ export default function PlayerCareer() {
     const route = useRoute();
     const {auth} = useContext(AuthContext);
     const [competitiveUpdates, setCompetitiveUpdates] = useState(null)
+    const navigation = useNavigation();
 
 
     useFocusEffect(
         useCallback(() => {
             const playerId = route.params?.playerId
+
+            // navigation.reset({playerId: null})
+
+            console.log("Recieved", playerId)
+
             setCompetitiveUpdates(null)
             if (!playerId) {
                 console.log("No player iD")
