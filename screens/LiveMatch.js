@@ -1,4 +1,4 @@
-import {RefreshControl, ScrollView, StyleSheet, Text, View} from 'react-native'
+import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native'
 import {
     getCoreGamePlayerStatus,
     getCurrentGameDetails,
@@ -6,13 +6,10 @@ import {
     getPlayerNames
 } from "../utils/game";
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
-import {useContext, useEffect, useState} from "react";
-import {Button, Card} from "react-native-ui-lib";
-import {agentData} from "../data/agent-data";
+import {useCallback, useContext, useEffect, useState} from "react";
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
 import Agent from "../components/agent";
-import {combineTransition} from "react-native-reanimated";
 import {screens} from "../constants/Screens";
 
 
@@ -40,22 +37,29 @@ const LiveMatch = () => {
         console.log("Requesting match details for matchId:", currentMatchId)
         getCurrentGameDetails(auth, currentMatchId).then(response => {
             setMatchDetails(response)
-        }).finally(() => {
             setRefreshing(false)
-        })
+        }).catch(err => setRefreshing(false))
     }
 
-    useFocusEffect(() => {
-        console.log("Route matchID: ", matchId)
-        if (matchId) {
-            setCurrentMatchId(matchId)
-        } else {
-            getCoreGamePlayerStatus(auth).then(response => {
-                console.log("Current MatchID: ", response)
-                setCurrentMatchId(response.matchId)
-            })
-        }
-    });
+    useEffect(() => {
+        console.log("Changed matchId, getting details")
+        getGameDetails()
+    }, [currentMatchId]);
+
+    useFocusEffect(
+        useCallback(() => {
+            console.log("Route matchID: ", matchId)
+            if (matchId) {
+                setCurrentMatchId(matchId)
+            } else {
+                getCoreGamePlayerStatus(auth).then(response => {
+                    console.log("Current MatchID: ", response)
+                    setCurrentMatchId(response.matchId)
+                })
+            }
+        }, [])
+    );
+
 
     useEffect(() => {
         console.log("MatchDetails", matchDetails)
@@ -74,20 +78,22 @@ const LiveMatch = () => {
             new Promise.all(playerIds.map(playerId => getPlayerCompetitveUpdates(auth, playerId, 0, 1))).then(
                 response => {
                     response.forEach(res => {
-                        // console.log("PLAYER_RANK", res['Matches'][0]["TierAfterUpdate"], res["Matches"].length, res["Matches"].length === 0 ? res["Matches"][0]["TierAfterUpdate"] : 0)
                         details[res['Subject']]["Rank"] = res["Matches"].length !== 0 ? res["Matches"][0]["TierAfterUpdate"] : 0
                     })
 
                     setPlayerDetails(details)
 
                     const blueTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Blue")
+                    console.log("BLUE_TEAM_PLAYERS", blueTeamPlayers)
                     setBlueTeamPlayers(blueTeamPlayers)
 
                     const redTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Red")
                     setRedTeamPlayers(redTeamPlayers)
-                    setIsLoading(false)
                 }
-            ).catch(err => console.log(err))
+            ).catch(err => console.log(err)).finally(() => {
+                setIsLoading(false)
+                setRefreshing(false)
+            })
 
 
         }).catch(err => console.log("Error fetching player details", err))
@@ -112,7 +118,8 @@ const LiveMatch = () => {
                         <View>
                             {blueTeamPlayers.map(
                                 (player, index) => (
-                                    <Agent agentKey={`blue_${index}`}
+                                    <Agent showRank={true}
+                                           agentKey={`blue_${index}`}
                                            player={player}
                                            playerDetails={playerDetails}
                                            containerStyle={"ally"}
@@ -125,7 +132,8 @@ const LiveMatch = () => {
 
                             {redTeamPlayers.map(
                                 (player, index) => (
-                                    <Agent agentKey={`red_${index}`}
+                                    <Agent showRank={true}
+                                           agentKey={`red_${index}`}
                                            player={player}
                                            playerDetails={playerDetails}
                                            containerStyle={"enemy"}

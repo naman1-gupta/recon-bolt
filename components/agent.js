@@ -7,8 +7,11 @@ import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
 
 export default function Agent(props) {
-    const {player, playerDetails, containerStyle, onPress, agentKey} = props
+    const {player, playerDetails, containerStyle, onPress, agentKey, showRank} = props
     const {auth} = useContext(AuthContext);
+
+    console.log("PLAYER_details", player)
+
 
 
     return (
@@ -21,7 +24,7 @@ export default function Agent(props) {
                 <View style={styles.gameBoardAgentDetails}>
                     <View style={styles.gameBoardAgentIconContainer}>
                         <Card.Image style={styles.gameBoardAgentIcon}
-                                    source={{uri: agentData.find(agent => player['CharacterID'] === agent.uuid).displayIconSmall}}
+                                    source={{uri: agentData.find(agent => player['CharacterID'].toLowerCase() === agent.uuid)?.displayIconSmall}}
                                     key={player['Subject']}
                         />
                     </View>
@@ -32,7 +35,7 @@ export default function Agent(props) {
                             grey10: true
                         }]}/>
                         <Card.Section content={[{
-                            text: agentData.find(agent => agent.uuid === player['CharacterID']).displayName,
+                            text: agentData.find(agent => agent.uuid === player['CharacterID'].toLowerCase())?.displayName,
                             text70: true,
                             grey10: true
                         }]}/>
@@ -40,12 +43,15 @@ export default function Agent(props) {
 
                 </View>
 
-                <View style={styles.gameBoardAgentIconContainer}>
-                    <Card.Image style={styles.gameBoardAgentIcon}
-                                source={{uri: rankData.tiers.find(rank => playerDetails[player["Subject"]]["Rank"] === rank.tier).smallIcon}}
-                                key={player['Subject']}
-                    />
-                </View>
+                {
+                    showRank && <View style={styles.gameBoardAgentIconContainer}>
+                        <Card.Image style={styles.gameBoardAgentIcon}
+                                    source={{uri: rankData.tiers.find(rank => playerDetails[player["Subject"]]["Rank"] === rank.tier).smallIcon}}
+                                    key={player['Subject']}
+                        />
+                    </View>
+                }
+
             </View>
         </Card>
     )

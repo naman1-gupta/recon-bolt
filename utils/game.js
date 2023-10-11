@@ -28,7 +28,7 @@ riotClient.interceptors.response.use((response) => {
     return response
 }, (error) => {
     if(error.response.status !== 404) {
-        console.log("ERROR ===> ", error.response.headers)
+        console.log("ERROR ===> ", JSON.stringify(error.config.url), error.response.data)
     }
     return Promise.reject(error)
 })
@@ -85,12 +85,11 @@ export async function getConfig(auth, geo) {
         }
 
         axios.request(config).then((response) => {
-            console.log("Configs", response.data)
 
             const promises = []
             Object.keys(response.data['Collapsed']).forEach((k) => {
                 if (k.startsWith("SERVICEURL")) {
-                    console.log(k)
+                    // console.log(k)
                     promises.push(AsyncStorage.setItem(k, response.data['Collapsed'][k]))
                 }
             })

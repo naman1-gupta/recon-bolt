@@ -1,6 +1,16 @@
-import {ActivityIndicator, Dimensions, Image, ImageBackground, ScrollView, StyleSheet, Text, View} from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    ImageBackground,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View
+} from "react-native";
 import {useFocusEffect, useRoute} from "@react-navigation/native";
-import {useContext, useEffect, useState} from "react";
+import {useContext, useEffect, useLayoutEffect, useState} from "react";
 import {getPlayerCompetitveUpdates} from "../utils/game";
 import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
@@ -18,19 +28,24 @@ export default function PlayerCareer() {
     const playerId = route.params?.playerId
 
     useFocusEffect(() => {
+        setCompetitiveUpdates(null)
         if (!playerId){
             console.log("No player iD")
             return
         }
+
         getPlayerCompetitveUpdates(auth, playerId).then((response) => {
             // console.log(response)
             setCompetitiveUpdates(response)
-        })
+        }).catch(err => Alert.alert("Error getting player details", "Please try again later.."))
     });
 
     const getRankBadge = () => {
-        return rankData.tiers.find(tier =>
-            tier.tier === competitiveUpdates.Matches[0].TierAfterUpdate)
+        if(competitiveUpdates?.Matches.length !== 0)
+            return rankData.tiers.find(tier =>
+                tier.tier === competitiveUpdates.Matches[0].TierAfterUpdate)
+        else
+            return rankData.tiers.find(tier => tier.tier === 0)
     }
 
     if (competitiveUpdates) {

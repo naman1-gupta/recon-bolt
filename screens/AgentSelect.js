@@ -61,6 +61,10 @@ function AgentSelect({route, navigation}) {
             setAgentLocked(true)
             const timer = setInterval(() => {
                 getCoreGamePlayerStatus(auth).then(response => {
+                    console.log("CORE_GAME_RESPONSE", response)
+                    if(Object.keys(response).length === 0) {
+                        return
+                    }
                     clearInterval(timer)
 
                     navigation.navigate(screens.LIVE_MATCH, {matchId: matchId})
