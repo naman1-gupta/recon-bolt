@@ -1,11 +1,18 @@
-import {Dimensions, FlatList, Image, Pressable, StyleSheet, View} from 'react-native';
+import {Alert, Dimensions, FlatList, Image, Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {agentData} from "../data/agent-data";
-import {getCoreGamePlayerStatus, getPlayerEntitlements, hoverAgent, lockAgent} from "../utils/game";
+import {
+    getCoreGamePlayerStatus,
+    getPlayerEntitlements,
+    getPreGameMatchStatus,
+    hoverAgent,
+    lockAgent
+} from "../utils/game";
 import {useContext, useEffect, useState} from "react";
 import Button from 'react-native-ui-lib/button'
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
 import {screens} from "../constants/Screens";
+import Agent from "../components/agent";
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -22,6 +29,7 @@ function AgentSelect({route, navigation}) {
     const [playableAgents, setPlayableAgents] = useState([])
     const [unlockedCharacterIDs, setUnlockedCharacterIDs] = useState([])
     const [agentLocked, setAgentLocked] = useState(false)
+    const [agentSelection, setAgentSelection] = useState(null)
     const {auth} = useContext(AuthContext)
 
     const matchId = route.params?.matchId
@@ -41,6 +49,25 @@ function AgentSelect({route, navigation}) {
             setPlayableAgents(unlockedPlayableAgents)
             setIsLoading(false)
         })
+
+        getPreGameMatchStatus(auth, matchId).then(response => {
+            setAgentSelection(response)
+        })
+
+        const timer = setInterval( () => {
+                console.log("Querying agent select status")
+                getPreGameMatchStatus(auth, matchId).then(response => {
+                    // console.log(JSON.stringify(response, null, 4))
+                    if(Object.keys(response).length === 0){
+                        console.log("Clearing interval")
+                        clearInterval(timer)
+                    }
+
+                    setAgentSelection(response)
+                }).catch(err => Alert.alert("Error fetching players"))
+        }, 2000)
+        clearInterval(timer)
+
     }, []);
 
     const onAgentSelected = (agentId) => {
@@ -101,6 +128,14 @@ function AgentSelect({route, navigation}) {
             <View>
                 <Button label={"Confirm"} onPress={onAgentLocked} disabled={agentLocked}/>
             </View>
+
+            <ScrollView style={{width: '100%'}}>
+                {
+                    agentSelection &&
+                    agentSelection["AllyTeam"]["Players"].map((player, index) =>
+                    <Agent player={player} showRank={false} onPress={(s) => console.log(s)} agentKey={index}/>)
+                }
+            </ScrollView>
         </View>
     )
 }

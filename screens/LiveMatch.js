@@ -18,9 +18,7 @@ const LiveMatch = () => {
     const [matchDetails, setMatchDetails] = useState(null)
     const matchId = route.params?.matchId;
     const [currentMatchId, setCurrentMatchId] = useState('')
-    const [redTeamPlayers, setRedTeamPlayers] = useState([])
-    const [blueTeamPlayers, setBlueTeamPlayers] = useState([])
-    const [playerDetails, setPlayerDetails] = useState({})
+    const [players, setPlayers] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
     const {auth} = useContext(AuthContext)
     const navigation = useNavigation();
@@ -62,7 +60,7 @@ const LiveMatch = () => {
 
 
     useEffect(() => {
-        console.log("MatchDetails", matchDetails)
+        // console.log("MatchDetails", matchDetails)
         if (!matchDetails || Object.keys(matchDetails).length === 0) {
             return
         }
@@ -70,32 +68,18 @@ const LiveMatch = () => {
         const playerIds = matchDetails['Players'].map(player => player['Subject'])
         getPlayerNames(auth, playerIds).then(response => {
             const details = {}
-
+            const players = matchDetails["Players"]
             response.forEach(player => {
-                details[player['Subject']] = player
+                details[player["Subject"]] = player
+                players.forEach(pl => {
+                    if (pl["Subject"] === player["Subject"]) {
+                        pl["Identity"] = player
+                    }
+                })
             })
 
-            new Promise.all(playerIds.map(playerId => getPlayerCompetitveUpdates(auth, playerId, 0, 1))).then(
-                response => {
-                    response.forEach(res => {
-                        details[res['Subject']]["Rank"] = res["Matches"].length !== 0 ? res["Matches"][0]["TierAfterUpdate"] : 0
-                    })
-
-                    setPlayerDetails(details)
-
-                    const blueTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Blue")
-                    console.log("BLUE_TEAM_PLAYERS", blueTeamPlayers)
-                    setBlueTeamPlayers(blueTeamPlayers)
-
-                    const redTeamPlayers = matchDetails['Players'].filter(player => player['TeamID'] === "Red")
-                    setRedTeamPlayers(redTeamPlayers)
-                }
-            ).catch(err => console.log(err)).finally(() => {
-                setIsLoading(false)
-                setRefreshing(false)
-            })
-
-
+            setPlayers(players)
+            setIsLoading(false)
         }).catch(err => console.log("Error fetching player details", err))
 
     }, [matchDetails]);
@@ -116,27 +100,12 @@ const LiveMatch = () => {
                     !isLoading &&
                     <>
                         <View>
-                            {blueTeamPlayers.map(
+                            {players.map(
                                 (player, index) => (
-                                    <Agent showRank={true}
-                                           agentKey={`blue_${index}`}
+                                    <Agent
+                                           showRank={true}
+                                           agentKey={`agent_${index}`}
                                            player={player}
-                                           playerDetails={playerDetails}
-                                           containerStyle={"ally"}
-                                           onPress={getPlayerCareer}
-                                    />
-                                )
-                            )}
-                        </View>
-                        <View>
-
-                            {redTeamPlayers.map(
-                                (player, index) => (
-                                    <Agent showRank={true}
-                                           agentKey={`red_${index}`}
-                                           player={player}
-                                           playerDetails={playerDetails}
-                                           containerStyle={"enemy"}
                                            onPress={getPlayerCareer}
                                     />
                                 )

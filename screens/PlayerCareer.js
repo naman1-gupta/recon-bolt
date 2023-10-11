@@ -1,21 +1,11 @@
-import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View
-} from "react-native";
+import {ActivityIndicator, Alert, Dimensions, Image, ScrollView, StyleSheet, Text, View} from "react-native";
 import {useFocusEffect, useRoute} from "@react-navigation/native";
-import {useContext, useEffect, useLayoutEffect, useState} from "react";
+import {useCallback, useContext, useState} from "react";
 import {getPlayerCompetitveUpdates} from "../utils/game";
 import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
-import mapData from '../data/map-data';
 import Colors from "../constants/Colors";
+import Match from "../components/match";
 
 const deviceWidth = Dimensions.get("window").width
 
@@ -25,23 +15,24 @@ export default function PlayerCareer() {
     const [competitiveUpdates, setCompetitiveUpdates] = useState(null)
 
 
-    const playerId = route.params?.playerId
+    useFocusEffect(
+        useCallback(() => {
+            const playerId = route.params?.playerId
+            setCompetitiveUpdates(null)
+            if (!playerId) {
+                console.log("No player iD")
+                return
+            }
 
-    useFocusEffect(() => {
-        setCompetitiveUpdates(null)
-        if (!playerId){
-            console.log("No player iD")
-            return
-        }
-
-        getPlayerCompetitveUpdates(auth, playerId).then((response) => {
-            // console.log(response)
-            setCompetitiveUpdates(response)
-        }).catch(err => Alert.alert("Error getting player details", "Please try again later.."))
-    });
+            getPlayerCompetitveUpdates(auth, playerId).then((response) => {
+                setCompetitiveUpdates(response)
+            }).catch(err => Alert.alert("Error getting player details",
+                "Please try again later.."))
+        }, [route])
+    );
 
     const getRankBadge = () => {
-        if(competitiveUpdates?.Matches.length !== 0)
+        if (competitiveUpdates?.Matches.length !== 0)
             return rankData.tiers.find(tier =>
                 tier.tier === competitiveUpdates.Matches[0].TierAfterUpdate)
         else
@@ -59,23 +50,8 @@ export default function PlayerCareer() {
                 <ScrollView contentContainerStyle={styles.matchesContainer}>
                     {
                         competitiveUpdates.Matches.map((match, index) => {
-                            const mapDetails = mapData.find(map => map.mapUrl === match.MapID)
                             return (
-                                <View key={`match_${index}`} style={styles.matchContainer}>
-                                    <ImageBackground style={styles.matchMapBackgroundImage}
-                                                     source={{uri: mapDetails.listViewIcon}}>
-                                        <View style={styles.matchDetailsContainer}>
-                                            <Text style={styles.mapResultsText}>{mapDetails.displayName}</Text>
-                                            <Text style={[
-                                                styles.mapResultsText,
-                                                match.RankedRatingEarned >= 0 ? styles.greenText : styles.redText
-                                            ]}>
-                                                {match.RankedRatingEarned}
-                                            </Text>
-                                        </View>
-
-                                    </ImageBackground>
-                                </View>
+                                <Match key={`match_${index}`} matchDetails={match}/>
                             )
                         })
                     }

@@ -2,21 +2,36 @@ import {StyleSheet, View} from "react-native";
 import {Card} from "react-native-ui-lib";
 import {agentData} from "../data/agent-data";
 import Colors from "../constants/Colors";
-import {useContext} from "react";
+import {useContext, useEffect, useState} from "react";
 import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
+import {getPlayerCompetitveUpdates} from "../utils/game";
 
 export default function Agent(props) {
-    const {player, playerDetails, containerStyle, onPress, agentKey, showRank} = props
+    const {player, onPress, agentKey, showRank} = props
     const {auth} = useContext(AuthContext);
 
-    console.log("PLAYER_details", player)
+    const [playerTier, setPlayerTier] = useState(0)
 
+    console.log(player)
+    useEffect(() => {
+        if(!showRank){
+            return
+        }
 
+        const subject = player["Subject"]
+        getPlayerCompetitveUpdates(auth, subject, 0, 1, "competitive").then(response => {
+            if(response["Matches"].length !== 0) {
+                setPlayerTier(response["Matches"][0]["TierAfterUpdate"])
+            }
+        })
+    }, []);
+
+    const agent = agentData.find(agent => player['CharacterID'].toLowerCase() === agent.uuid)
 
     return (
         <Card key={agentKey}
-            style={[styles.playerContainer, containerStyle === "enemy" ? styles.enemyPlayerContainer : styles.allyPlayerContainer]}
+            style={[styles.playerContainer, player["TeamID"] === "Red" ? styles.enemyPlayerContainer : styles.allyPlayerContainer]}
             flex row
             onPress={onPress.bind(this, player["Subject"])}>
             <View style={styles.gameBoardRow}>
@@ -24,18 +39,18 @@ export default function Agent(props) {
                 <View style={styles.gameBoardAgentDetails}>
                     <View style={styles.gameBoardAgentIconContainer}>
                         <Card.Image style={styles.gameBoardAgentIcon}
-                                    source={{uri: agentData.find(agent => player['CharacterID'].toLowerCase() === agent.uuid)?.displayIconSmall}}
+                                    source={{uri: player["CharacterID"] ? agent?.displayIconSmall : "https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/0/smallicon.png"}}
                                     key={player['Subject']}
                         />
                     </View>
                     <View style={styles.gameBoardAgentInfoContainer}>
                         <Card.Section content={[{
-                            text: playerDetails[player['Subject']]['GameName'],
+                            text: player.Identity?.GameName || "....",
                             text70: true,
                             grey10: true
                         }]}/>
                         <Card.Section content={[{
-                            text: agentData.find(agent => agent.uuid === player['CharacterID'].toLowerCase())?.displayName,
+                            text: ["selected", ""].includes(player["CharacterSelectionState"]) ? "Picking..." : agent?.displayName,
                             text70: true,
                             grey10: true
                         }]}/>
@@ -46,7 +61,7 @@ export default function Agent(props) {
                 {
                     showRank && <View style={styles.gameBoardAgentIconContainer}>
                         <Card.Image style={styles.gameBoardAgentIcon}
-                                    source={{uri: rankData.tiers.find(rank => playerDetails[player["Subject"]]["Rank"] === rank.tier).smallIcon}}
+                                    source={{uri: rankData.tiers.find(rank => playerTier === rank.tier).smallIcon}}
                                     key={player['Subject']}
                         />
                     </View>

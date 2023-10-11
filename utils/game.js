@@ -2,6 +2,7 @@ import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CurrentGame from "../mocks/CurrentGame";
 import {mockPlayerCareer} from '../mocks/PlayerCareer'
+import AgentSelectMock from "../mocks/AgentSelectMock";
 
 const PROXY_URL = 'https://flash.namang.me/proxy?url='
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
@@ -246,7 +247,6 @@ export async function getPreGamePlayerStatus(auth) {
     const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_PREGAME")
     // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
-    console.log("AUTH_CONTEXT", auth)
     const PLAYER_ID = auth.identity.sub;
 
 
@@ -323,8 +323,10 @@ export async function getPreGameMatchStatus(auth, matchId) {
             }
         }
 
+        resolve(AgentSelectMock)
+        return
+
         riotClient.request(config).then((response) => {
-            console.log("matchStatus", response.data)
             resolve(response.data)
         }).catch((err) => {
             if (err.response.status === 404) {
@@ -438,6 +440,9 @@ export async function getCurrentGameDetails(auth, matchId) {
                 'x-riot-entitlements-jwt': auth.entitlements_token,
             }
         }
+        //
+        // resolve(CurrentGame)
+        // return
 
         riotClient.request(config).then(async (response) => {
             resolve(response.data)
