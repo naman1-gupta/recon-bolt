@@ -158,6 +158,9 @@ const AuthenticatedStack = () => {
                                       size={24}
                                       color={color}/>
                     }}
+                    initialParams={{
+                        playerId: authContext.auth.identity.sub
+                    }}
         />
     </Tab.Navigator>
 }

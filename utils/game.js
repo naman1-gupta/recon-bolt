@@ -600,3 +600,29 @@ export async function getMatchDetails(auth, matchId) {
         })
     })
 }
+
+
+export async function getMatchHistory(auth, playerId, startIndex = 0, endIndex = 10, queue = "competitive") {
+    const SERVICE_URL = await AsyncStorage.getItem("SERVICEURL_MATCHHISTORY")
+
+    return new Promise((resolve, reject) => {
+        const config = {
+            url: `${SERVICE_URL}/match-history/v1/history/${playerId}?startIndex=${startIndex}&endIndex=${endIndex}&queue=${queue}`,
+            method: 'get',
+            headers: {
+                'authorization': `Bearer ${auth.access_token}`,
+                'x-riot-entitlements-jwt': auth.entitlements_token,
+            },
+        }
+
+        riotClient.request(config).then((response) => {
+            resolve(response.data)
+        }).catch((err) => {
+            if (err.response.status === 404) {
+                resolve(null)
+            } else {
+                reject(err.response.status)
+            }
+        })
+    })
+}

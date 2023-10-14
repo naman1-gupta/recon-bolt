@@ -1,7 +1,7 @@
 import {ActivityIndicator, Alert, Dimensions, Image, ScrollView, StyleSheet, Text, View} from "react-native";
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {useCallback, useContext, useState} from "react";
-import {getPlayerCompetitveUpdates} from "../utils/game";
+import {getMatchHistory, getPlayerCompetitveUpdates} from "../utils/game";
 import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
 import Colors from "../constants/Colors";
@@ -14,14 +14,13 @@ export default function PlayerCareer() {
     const {auth} = useContext(AuthContext);
     const [competitiveUpdates, setCompetitiveUpdates] = useState(null)
     const navigation = useNavigation();
-
+    const [playerId, setPlayerId] = useState(null)
 
     useFocusEffect(
         useCallback(() => {
             const playerId = route.params?.playerId
 
-            // navigation.reset({playerId: null})
-
+            setPlayerId(playerId)
             console.log("Recieved", playerId)
 
             setCompetitiveUpdates(null)
@@ -34,6 +33,11 @@ export default function PlayerCareer() {
                 setCompetitiveUpdates(response)
             }).catch(err => Alert.alert("Error getting player details",
                 "Please try again later.."))
+
+            getMatchHistory(auth, playerId).then(response => {
+                // console.log("MATCH_HISTORY========")
+                // console.log(JSON.stringify(response, null, 4))
+            }).catch(err => console.log("Error fetching match history", err))
         }, [route])
     );
 
@@ -52,12 +56,15 @@ export default function PlayerCareer() {
                     <Image style={styles.rankBadge} source={{uri: getRankBadge().largeIcon}}/>
                     <Text style={styles.rankText}>{getRankBadge().tierName}</Text>
                 </View>
+                <View style={styles.rankBadgeContainer}>
+                    <Text style={styles.playerNameText}>{`${auth.identity.game_name} #${auth.identity.tag_line}`}</Text>
+                </View>
 
                 <ScrollView contentContainerStyle={styles.matchesContainer}>
                     {
                         competitiveUpdates.Matches.map((match, index) => {
                             return (
-                                <Match key={`match_${index}`} matchDetails={match}/>
+                                <Match playerId={playerId} key={`match_${index}`} matchDetails={match}/>
                             )
                         })
                     }
@@ -83,6 +90,7 @@ const styles = StyleSheet.create({
     rankBadgeContainer: {
         alignItems: "center",
         width: "100%",
+        marginBottom: 12,
     },
     matchesContainer: {
         alignItems: "center",
@@ -113,6 +121,11 @@ const styles = StyleSheet.create({
         height: 100,
         width: 100,
         marginVertical: 4
+    },
+    playerNameText: {
+        fontWeight: "900",
+        color: "white",
+        fontSize: 24
     },
     rankText: {
         fontWeight: "700",
