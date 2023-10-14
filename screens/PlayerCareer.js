@@ -13,7 +13,6 @@ export default function PlayerCareer() {
     const route = useRoute();
     const {auth} = useContext(AuthContext);
     const [competitiveUpdates, setCompetitiveUpdates] = useState(null)
-    const navigation = useNavigation();
     const [playerId, setPlayerId] = useState(null)
 
     useFocusEffect(
@@ -34,10 +33,6 @@ export default function PlayerCareer() {
             }).catch(err => Alert.alert("Error getting player details",
                 "Please try again later.."))
 
-            getMatchHistory(auth, playerId).then(response => {
-                // console.log("MATCH_HISTORY========")
-                // console.log(JSON.stringify(response, null, 4))
-            }).catch(err => console.log("Error fetching match history", err))
         }, [route])
     );
 
@@ -64,7 +59,7 @@ export default function PlayerCareer() {
                     {
                         competitiveUpdates.Matches.map((match, index) => {
                             return (
-                                <Match playerId={playerId} key={`match_${index}`} matchDetails={match}/>
+                                <Match playerId={playerId} matchDetails={match}/>
                             )
                         })
                     }

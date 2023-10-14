@@ -15,6 +15,7 @@ import {AuthContext} from "../store/Auth";
 import {screens} from "../constants/Screens";
 import Agent from "../components/agent";
 import {useFocusEffect} from "@react-navigation/native";
+import AgentIcon from "../components/agent-select-icon";
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -73,9 +74,6 @@ function AgentSelect({route, navigation}) {
                 setIsLoading(false)
             })
 
-            // getPreGameMatchStatus(auth, matchId).then(response => {
-            //     setAgentSelection(response)
-            // })
 
             const timer = setInterval(() => {
                 console.log("Querying agent select status")
@@ -105,6 +103,11 @@ function AgentSelect({route, navigation}) {
         return response?.AllyTeam?.Players.map(player => {
             if (player.Subject === auth.identity.sub && player.CharacterSelectionState === "locked") {
                 setAgentLocked(true)
+            }
+
+            if(player.CharacterSelectionState === "locked" && unlockedCharacterIDs.includes(player.CharacterID)) {
+                setUnlockedCharacterIDs(unlockedCharacterIDs =>
+                    unlockedCharacterIDs.filter(chId => chId !== player.CharacterID))
             }
 
             return {
@@ -156,17 +159,22 @@ function AgentSelect({route, navigation}) {
                 <FlatList extraData={agent} style={styles.agentList} numColumns={cols} data={playableAgents}
                           renderItem={({item}) => {
                               return (
-                                  <Pressable onPress={onAgentSelected.bind(this, item.uuid)}>
-                                      <View
-                                          style={[
-                                              styles.agent,
-                                              unlockedCharacterIDs.includes(item.uuid) ? null : styles.agentDisabled,
-                                              item.uuid === agent ? styles.agentSelected : null
-                                          ]}>
-                                          <Image style={styles.agentIcon}
-                                                 source={item.imageSource}/>
-                                      </View>
-                                  </Pressable>
+                                  <AgentIcon item={item}
+                                             disabled={!unlockedCharacterIDs.includes(item.uuid)}
+                                             selected={item.uuid === agent}
+                                             onPress={onAgentSelected}
+                                  />
+                                  // <Pressable onPress={onAgentSelected.bind(this, item.uuid)}>
+                                  //     <View
+                                  //         style={[
+                                  //             styles.agent,
+                                  //             unlockedCharacterIDs.includes(item.uuid) ? null : styles.agentDisabled,
+                                  //             item.uuid === agent ? styles.agentSelected : null
+                                  //         ]}>
+                                  //         <Image style={styles.agentIcon}
+                                  //                source={item.imageSource}/>
+                                  //     </View>
+                                  // </Pressable>
                               )
                           }}/>
                 <Button label={"Confirm"} onPress={onAgentLocked} disabled={agentLocked}/>

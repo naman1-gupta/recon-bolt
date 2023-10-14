@@ -301,7 +301,7 @@ export async function getCoreGamePlayerStatus(auth) {
             resolve(matchDetails)
         }).catch((err) => {
             if (err.response.status === 404) {
-                resolve({})
+                resolve(null)
             } else {
                 reject(err.response.status)
             }

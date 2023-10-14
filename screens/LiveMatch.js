@@ -11,7 +11,6 @@ import {screens} from "../constants/Screens";
 const LiveMatch = () => {
     const route = useRoute();
     const [matchDetails, setMatchDetails] = useState(null)
-    const matchId = route.params?.matchId;
     const [currentMatchId, setCurrentMatchId] = useState('')
     const [players, setPlayers] = useState(null)
     const [isLoading, setIsLoading] = useState(true)
@@ -42,9 +41,11 @@ const LiveMatch = () => {
 
     useFocusEffect(
         useCallback(() => {
-            console.log("Route matchID: ", matchId)
-            if (matchId) {
-                setCurrentMatchId(matchId)
+            const routeMatchId = route.params?.matchId;
+
+            console.log("Route matchID: ", routeMatchId)
+            if (routeMatchId) {
+                setCurrentMatchId(routeMatchId)
             } else {
                 getCoreGamePlayerStatus(auth).then(response => {
                     console.log("Current MatchID: ", response)
@@ -61,23 +62,35 @@ const LiveMatch = () => {
             return
         }
 
+        const timer = setInterval( () => {
+            getCoreGamePlayerStatus(auth).then(response => {
+                if(response === {}){
+                    navigation.navigate(screens.PARTY_HOME)
+                    clearInterval(timer)
+                }
+            })
+        }, 10000)
+
         const playerIds = matchDetails['Players'].map(player => player['Subject'])
         getPlayerNames(auth, playerIds).then(response => {
             const details = {}
             const players = matchDetails["Players"]
             response.forEach(player => {
                 details[player["Subject"]] = player
-                // players.forEach(pl => {
-                //     if (pl["Subject"] === player["Subject"]) {
-                //         pl["Identity"] = player
-                //     }
-                // })
             })
 
             setPlayerIdentities(details)
             setPlayers(players)
             setIsLoading(false)
+
+
         }).catch(err => console.log("Error fetching player details", err))
+
+        return () => {
+            console.log("Clearing timer")
+            if(timer)
+                clearInterval(timer)
+        }
 
     }, [matchDetails]);
 
