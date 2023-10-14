@@ -20,7 +20,7 @@ export default function Agent(props) {
 
         const subject = player["Subject"]
         getPlayerCompetitveUpdates(auth, subject, 0, 1, "competitive").then(response => {
-            if(response["Matches"].length !== 0) {
+            if(response && response["Matches"].length !== 0) {
                 setPlayerTier(response["Matches"][0]["TierAfterUpdate"])
             }
         })

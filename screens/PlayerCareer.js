@@ -1,7 +1,7 @@
 import {ActivityIndicator, Alert, Dimensions, Image, ScrollView, StyleSheet, Text, View} from "react-native";
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
-import {useCallback, useContext, useState} from "react";
-import {getMatchHistory, getPlayerCompetitveUpdates} from "../utils/game";
+import {useCallback, useContext, useEffect, useState} from "react";
+import {getMatchHistory, getPlayerCompetitveUpdates, getPlayerMMR, getPlayerNames} from "../utils/game";
 import {AuthContext} from "../store/Auth";
 import rankData from "../data/rank-data";
 import Colors from "../constants/Colors";
@@ -14,6 +14,8 @@ export default function PlayerCareer() {
     const {auth} = useContext(AuthContext);
     const [competitiveUpdates, setCompetitiveUpdates] = useState(null)
     const [playerId, setPlayerId] = useState(null)
+    const [playerIdentity, setPlayerIdentity] = useState(null)
+    const [playerTier, setPlayerTier] = useState(null)
 
     useFocusEffect(
         useCallback(() => {
@@ -28,7 +30,26 @@ export default function PlayerCareer() {
                 return
             }
 
-            getPlayerCompetitveUpdates(auth, playerId).then((response) => {
+            if (playerId !== auth.identity.sub) {
+                getPlayerNames(auth, [playerId]).then(response => {
+                    console.log(response[0])
+                    setPlayerIdentity(response[0])
+                })
+            } else {
+                setPlayerIdentity(auth.identity)
+            }
+
+            // getPlayerMMR(auth, playerId).then(response => {
+            //     console.log("MMR", response)
+            //     const tierInfo = rankData.tiers.find(rank => rank.tier === response?.LatestCompetitiveUpdate?.TierAfterUpdate)
+            //
+            //     setPlayerTier(tierInfo)
+            // }).catch(err => {
+            //     console.log("Error fetching MMR")
+            // })
+
+
+            getPlayerCompetitveUpdates(auth, playerId, 0, 10, "competitive").then((response) => {
                 setCompetitiveUpdates(response)
             }).catch(err => Alert.alert("Error getting player details",
                 "Please try again later.."))
@@ -36,30 +57,52 @@ export default function PlayerCareer() {
         }, [route])
     );
 
-    const getRankBadge = () => {
-        if (competitiveUpdates?.Matches.length !== 0)
-            return rankData.tiers.find(tier =>
-                tier.tier === competitiveUpdates.Matches[0].TierAfterUpdate)
-        else
-            return rankData.tiers.find(tier => tier.tier === 0)
-    }
+    useEffect(() => {
+        if (!competitiveUpdates) {
+            return
+        }
 
-    if (competitiveUpdates) {
+        let tierInfo;
+
+        if(competitiveUpdates.Matches.length === 0){
+            tierInfo = rankData.tiers.find(tier => tier.tier === 0)
+        }
+        else {
+            let flag = -1
+            for(let m of competitiveUpdates.Matches){
+                if(m.RankedRatingEarned !== 0){
+                    tierInfo = rankData.tiers.find(rank => rank.tier === m.TierAfterUpdate)
+                    flag = 0
+                }
+            }
+
+            if(flag !== 0){
+                tierInfo = rankData.tiers.find(tier => tier.tier === 0)
+            }
+        }
+
+        setPlayerTier(tierInfo)
+    }, [competitiveUpdates]);
+
+
+    if (competitiveUpdates && playerTier) {
         return (
             <View style={styles.screen}>
                 <View style={styles.rankBadgeContainer}>
-                    <Image style={styles.rankBadge} source={{uri: getRankBadge().largeIcon}}/>
-                    <Text style={styles.rankText}>{getRankBadge().tierName}</Text>
+                    <Image style={styles.rankBadge} source={{uri: playerTier.largeIcon}}/>
+                    <Text style={styles.rankText}>{playerTier.tierName}</Text>
                 </View>
                 <View style={styles.rankBadgeContainer}>
-                    <Text style={styles.playerNameText}>{`${auth.identity.game_name} #${auth.identity.tag_line}`}</Text>
+                    <Text
+                        style={styles.playerNameText}>{`${playerIdentity.game_name} #${playerIdentity.tag_line}`}</Text>
                 </View>
 
                 <ScrollView contentContainerStyle={styles.matchesContainer}>
                     {
                         competitiveUpdates.Matches.map((match, index) => {
                             return (
-                                <Match playerId={playerId} matchDetails={match}/>
+                                <Match logMatchData={false} showDetails={true} playerId={playerId}
+                                       matchDetails={match}/>
                             )
                         })
                     }

@@ -3,6 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import CurrentGame from "../mocks/CurrentGame";
 import {mockPlayerCareer} from '../mocks/PlayerCareer'
 import AgentSelectMock from "../mocks/AgentSelectMock";
+import matchDetails from "../mocks/MatchDetails";
+import matchData from "../mocks/MatchDetails";
 
 const PROXY_URL = 'https://flash.namang.me/proxy?url='
 const RIOTCLIENT_PLATFORM = 'eyJwbGF0Zm9ybVR5cGUiOiJQQyIsInBsYXRmb3JtT1NWZXJzaW9uIjoiMTAuMC4xOTA0Mi4xLjI1Ni42NGJpdCIsInBsYXRmb3JtT1MiOiJXaW5kb3dzIiwicGxhdGZvcm1DaGlwc2V0IjoiVW5rbm93biJ9'
@@ -518,10 +520,11 @@ export async function getPlayerCompetitveUpdates(auth, playerId, startIndex = 0,
     // const auth = JSON.parse(await AsyncStorage.getItem("auth"))
 
     // playerId = "610ee2b8-0ad2-5fff-a819-defc284b519d"
+    queue = ''
 
     return new Promise((resolve, reject) => {
         const config = {
-            url: `${SERVICE_URL}/mmr/v1/players/${playerId}/competitiveupdates?startIndex=${startIndex}&endIndex=${endIndex}&queue=${queue}`,
+            url: `${SERVICE_URL}/mmr/v1/players/${playerId}/competitiveupdates?startIndex=${startIndex}&endIndex=${endIndex}`,
             method: 'get',
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
@@ -529,10 +532,6 @@ export async function getPlayerCompetitveUpdates(auth, playerId, startIndex = 0,
             },
         }
 
-        // setTimeout(() => {
-        //     resolve(mockPlayerCareer)
-        // }, 1000)
-        // return
 
         riotClient.request(config).then((response) => {
             resolve(response.data)
@@ -554,7 +553,7 @@ export async function getPlayerMMR(auth, playerId) {
 
     return new Promise((resolve, reject) => {
         const config = {
-            url: `${SERVICE_URL}/mmr/v1/players/${auth.identity.sub}`,
+            url: `${SERVICE_URL}/mmr/v1/players/${playerId}`,
             method: 'get',
             headers: {
                 'authorization': `Bearer ${auth.access_token}`,
@@ -589,9 +588,11 @@ export async function getMatchDetails(auth, matchId) {
             },
         }
 
+
         riotClient.request(config).then((response) => {
             resolve(response.data)
         }).catch((err) => {
+            console.log("Error fetching match-details", err, matchId)
             if (err.response.status === 404) {
                 resolve(null)
             } else {

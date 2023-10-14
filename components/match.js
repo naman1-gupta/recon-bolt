@@ -1,37 +1,49 @@
-import {ImageBackground, StyleSheet, Text, View, Image} from "react-native";
+import {ImageBackground, StyleSheet, Text, View, Image, ActivityIndicator} from "react-native";
 import mapData from "../data/map-data";
 import Colors from "../constants/Colors";
 import {useContext, useEffect, useState} from "react";
 import {getMatchDetails} from "../utils/game";
 import {AuthContext} from "../store/Auth";
-import {insertData} from "../utils/supabase";
 import {agentData} from "../data/agent-data";
+import rankData from "../data/rank-data";
 
 const match = (props) => {
-    const {matchDetails, playerId} = props
+    const {matchDetails, playerId, showDetails, logMatchData} = props
     const mapDetails = mapData.find(map => map.mapUrl === matchDetails.MapID)
     const {auth} = useContext(AuthContext)
 
+    const [matchStats, setMatchStats] = useState(null)
     const [playerStats, setPlayerStats] = useState(null)
+    const [loading, isLoading] = useState(false)
 
     useEffect(() => {
-        getMatchDetails(auth, matchDetails.MatchID).then(response => {
-            // insertData(response).then(response => console.log(response))
-            console.log(parseMatchData(response))
-            // console.log("STATS", stats);
-            setPlayerStats(parseMatchData(response))
+        if (!showDetails) {
+            return
+        }
 
+
+        isLoading(true)
+        getMatchDetails(auth, matchDetails.MatchID).then(response => {
+            if (response) {
+                setMatchStats(response)
+            }
         }).catch(err => {
             console.log(
                 "error fetching match details", err
             )
+        }).finally(() => {
+            isLoading(false)
         })
     }, []);
 
-    const parseMatchData = (data) => {
 
-        for(let player of data?.players){
-            if(player.subject === playerId) {
+    useEffect(() => {
+        if (!matchStats) {
+            return
+        }
+
+        for (let player of matchStats?.players) {
+            if (player.subject === playerId) {
                 const stats = {
                     kills: player?.stats?.kills,
                     deaths: player?.stats?.deaths,
@@ -39,37 +51,56 @@ const match = (props) => {
                     characterId: player?.characterId
                 }
 
-                return stats
+                setPlayerStats(stats)
+                return
             }
         }
-    }
 
-    console.log(matchDetails)
+    }, [matchStats]);
 
-    if(!playerStats)
-        return null
+
+    // if(!playerStats)
+    //     return null
 
     return (
         <View key={matchDetails.MatchID} style={styles.matchContainer}>
-            <ImageBackground style={styles.matchMapBackgroundImage}
-                             source={{uri: mapDetails.listViewIcon}}>
-                <View style={styles.matchDetailsOuterContainer}>
-                    {
-                        playerStats &&
-                        <Image style={styles.matchAgentImage} source={{uri: agentData.find(agent => agent.uuid === playerStats.characterId).displayIconSmall}} />
-                    }
+            <ImageBackground source={{uri: mapDetails.splash}}
+                             imageStyle={styles.matchMapBackgroundImage}
+                             resizeMode={'cover'}
+                             style={styles.matchMapBackgroundImageContainer}>
 
-                    <View style={styles.matchDetailsContainer}>
-                        <Text style={styles.mapResultsText}>{playerStats ?  `${playerStats.kills} / ${playerStats.deaths} / ${playerStats.assists}` : 0 }</Text>
-                        <Text style={[
-                            styles.mapResultsText,
-                            matchDetails.RankedRatingEarned >= 0 ? styles.greenText : styles.redText
-                        ]}>
-                            {matchDetails.RankedRatingEarned}
-                        </Text>
-                    </View>
-                </View>
+                {
+                    loading ? <View><ActivityIndicator size={"small"} color={Colors.activeGoldTint}/></View> :
+                        <View style={styles.matchDetailsOuterContainer}>
+                            {
+                                playerStats &&
+                                <Image style={styles.matchAgentImage}
+                                       source={{uri: agentData.find(agent => agent.uuid === playerStats.characterId).displayIconSmall}}/>
+                            }
 
+                            <View style={styles.matchDetailsContainer}>
+                                <Text
+                                    style={styles.mapResultsText}>{playerStats ? `${playerStats.kills} / ${playerStats.deaths} / ${playerStats.assists}` : null}</Text>
+                                {
+                                    matchStats?.matchInfo?.isRanked &&
+                                    <View style={styles.rankedInfoContainer}>
+                                        <Text style={[
+                                            styles.mapResultsText,
+                                            matchDetails.RankedRatingEarned >= 0 ? styles.greenText : styles.redText
+                                        ]}>
+                                            {`${matchDetails.RankedRatingEarned > 0 ? '+' : null}${matchDetails.RankedRatingEarned}`}
+                                        </Text>
+                                        <Image
+                                            resizeMode={'center'}
+                                            source={{uri: rankData.tiers.find(rank => rank.tier === matchDetails.TierBeforeUpdate).largeIcon}}
+                                            style={styles.rankedInfoBadge}/>
+                                    </View>
+
+                                }
+
+                            </View>
+                        </View>
+                }
 
 
             </ImageBackground>
@@ -78,10 +109,23 @@ const match = (props) => {
 }
 
 const styles = StyleSheet.create({
+    rankedInfoBadge: {
+        width: 40,
+        height: 40,
+        flex: 1
+    },
+    rankedInfoContainer: {
+        width: '30%',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        flexDirection: 'row'
+    },
     matchMapBackgroundImage: {
-        paddingBottom: 0,
+        opacity: 0.6
+    },
+    matchMapBackgroundImageContainer: {
         flex: 1,
-        // opacity: 0.6
+        width: '100%',
     },
     matchDetailsOuterContainer: {
         height: '100%',
@@ -93,16 +137,19 @@ const styles = StyleSheet.create({
         minWidth: '20%',
     },
     matchContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
         width: "90%",
         marginVertical: 4,
         flexDirection: "row",
         height: 50,
-        borderColor: 'white',
+        borderColor: 'red',
         borderWidth: 1,
     },
     matchDetailsContainer: {
         width: '80%',
         padding: 8,
+        paddingRight: 0,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: 'center'
