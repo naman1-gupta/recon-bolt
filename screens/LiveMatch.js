@@ -1,10 +1,5 @@
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native'
-import {
-    getCoreGamePlayerStatus,
-    getCurrentGameDetails,
-    getPlayerCompetitveUpdates,
-    getPlayerNames
-} from "../utils/game";
+import {getCoreGamePlayerStatus, getCurrentGameDetails, getPlayerNames} from "../utils/game";
 import {useFocusEffect, useNavigation, useRoute} from "@react-navigation/native";
 import {useCallback, useContext, useEffect, useState} from "react";
 import Colors from "../constants/Colors";
@@ -23,6 +18,7 @@ const LiveMatch = () => {
     const {auth} = useContext(AuthContext)
     const navigation = useNavigation();
     const [refreshing, setRefreshing] = useState(false);
+    const [playerIdentities, setPlayerIdentities] = useState(null)
 
     const getGameDetails = () => {
         setRefreshing(true)
@@ -71,13 +67,14 @@ const LiveMatch = () => {
             const players = matchDetails["Players"]
             response.forEach(player => {
                 details[player["Subject"]] = player
-                players.forEach(pl => {
-                    if (pl["Subject"] === player["Subject"]) {
-                        pl["Identity"] = player
-                    }
-                })
+                // players.forEach(pl => {
+                //     if (pl["Subject"] === player["Subject"]) {
+                //         pl["Identity"] = player
+                //     }
+                // })
             })
 
+            setPlayerIdentities(details)
             setPlayers(players)
             setIsLoading(false)
         }).catch(err => console.log("Error fetching player details", err))
@@ -103,10 +100,11 @@ const LiveMatch = () => {
                             {players.map(
                                 (player, index) => (
                                     <Agent
-                                           showRank={true}
-                                           agentKey={`agent_${index}`}
-                                           player={player}
-                                           onPress={getPlayerCareer}
+                                        playerIdentity={playerIdentities[player["Subject"]]}
+                                        showRank={true}
+                                        agentKey={`agent_${index}`}
+                                        player={player}
+                                        onPress={getPlayerCareer}
                                     />
                                 )
                             )}

@@ -3,16 +3,18 @@ import {agentData} from "../data/agent-data";
 import {
     getCoreGamePlayerStatus,
     getPlayerEntitlements,
+    getPlayerNames,
     getPreGameMatchStatus,
     hoverAgent,
     lockAgent
 } from "../utils/game";
-import {useContext, useEffect, useState} from "react";
+import {useCallback, useContext, useState} from "react";
 import Button from 'react-native-ui-lib/button'
 import Colors from "../constants/Colors";
 import {AuthContext} from "../store/Auth";
 import {screens} from "../constants/Screens";
 import Agent from "../components/agent";
+import {useFocusEffect} from "@react-navigation/native";
 
 function AgentSelect({route, navigation}) {
     const playableCharacters = agentData.filter(agent => agent.isPlayableCharacter)
@@ -30,45 +32,86 @@ function AgentSelect({route, navigation}) {
     const [unlockedCharacterIDs, setUnlockedCharacterIDs] = useState([])
     const [agentLocked, setAgentLocked] = useState(false)
     const [agentSelection, setAgentSelection] = useState(null)
+    const [playerIdentities, setPlayerIdentities] = useState(null)
     const {auth} = useContext(AuthContext)
 
     const matchId = route.params?.matchId
 
-    useEffect(() => {
-        getPlayerEntitlements(auth).then(response => {
-            const charsUnlockedWithContracts = response['EntitlementsByTypes']
-                .filter(entitlementType => entitlementType["ItemTypeID"] === PLAYER_ITEM_TYPE_ID)[0].Entitlements
-                .map(entitlement => entitlement.ItemID)
-            const unlockedCharacterIDs = charsUnlockedWithContracts.concat(DEFAULT_CHARACTERS)
-            setUnlockedCharacterIDs(unlockedCharacterIDs)
+    useFocusEffect(
+        useCallback(() => {
 
-            const unlockedAgents = agentData.filter(agent => agent.isPlayableCharacter && unlockedCharacterIDs.includes(agent.uuid))
-            const sortedUnlockedAgents = unlockedAgents.sort((a, b) => a.displayName.localeCompare(b.displayName))
-            const unlockedPlayableAgents = [...sortedUnlockedAgents, ...playableCharacters.filter(a => !unlockedCharacterIDs.includes(a.uuid))]
-
-            setPlayableAgents(unlockedPlayableAgents)
-            setIsLoading(false)
-        })
-
-        // getPreGameMatchStatus(auth, matchId).then(response => {
-        //     setAgentSelection(response)
-        // })
-
-        const timer = setInterval(() => {
-            console.log("Querying agent select status")
             getPreGameMatchStatus(auth, matchId).then(response => {
-                // console.log(JSON.stringify(response, null, 4))
-                if (Object.keys(response).length === 0) {
-                    console.log("Clearing interval")
-                    clearInterval(timer)
-                }
+                console.log(response)
+                const playerIds = response["AllyTeam"]["Players"].map(player => player["Subject"])
+                const playerIdentities = {}
+                getPlayerNames(auth, playerIds).then(response => {
+                    response.forEach(player => {
+                        playerIdentities[player["Subject"]] = player
+                    })
 
-                setAgentSelection(response)
-            }).catch(err => Alert.alert("Error fetching players"))
-        }, 2000)
-        // clearInterval(timer)
+                    console.log("PLAYER_IDENTITIES", playerIdentities)
 
-    }, []);
+                    setPlayerIdentities(playerIdentities)
+                })
+            }).catch(err => {
+                console.log("Error fetching player identities", err)
+            })
+
+
+            getPlayerEntitlements(auth).then(response => {
+                const charsUnlockedWithContracts = response['EntitlementsByTypes']
+                    .filter(entitlementType => entitlementType["ItemTypeID"] === PLAYER_ITEM_TYPE_ID)[0].Entitlements
+                    .map(entitlement => entitlement.ItemID)
+                const unlockedCharacterIDs = charsUnlockedWithContracts.concat(DEFAULT_CHARACTERS)
+                setUnlockedCharacterIDs(unlockedCharacterIDs)
+
+                const unlockedAgents = agentData.filter(agent => agent.isPlayableCharacter && unlockedCharacterIDs.includes(agent.uuid))
+                const sortedUnlockedAgents = unlockedAgents.sort((a, b) => a.displayName.localeCompare(b.displayName))
+                const unlockedPlayableAgents = [...sortedUnlockedAgents, ...playableCharacters.filter(a => !unlockedCharacterIDs.includes(a.uuid))]
+
+                setPlayableAgents(unlockedPlayableAgents)
+                setIsLoading(false)
+            })
+
+            // getPreGameMatchStatus(auth, matchId).then(response => {
+            //     setAgentSelection(response)
+            // })
+
+            const timer = setInterval(() => {
+                console.log("Querying agent select status")
+                getPreGameMatchStatus(auth, matchId).then(response => {
+                    // console.log(JSON.stringify(response, null, 4))
+                    if (Object.keys(response).length === 0) {
+                        console.log("Clearing interval")
+                        clearInterval(timer)
+                    }
+
+
+                    setAgentSelection(parseAgentSelectionStatus(response))
+                }).catch(err => Alert.alert("Error fetching players"))
+            }, 2000)
+
+            return () => {
+                selectAgent(null)
+                setAgentLocked(false)
+                setAgentSelection(null)
+                clearInterval(timer)
+            }
+
+        }, [])
+    );
+
+    const parseAgentSelectionStatus = (response) => {
+        return response?.AllyTeam?.Players.map(player => {
+            if (player.Subject === auth.identity.sub && player.CharacterSelectionState === "locked") {
+                setAgentLocked(true)
+            }
+
+            return {
+                ...player,
+            }
+        })
+    }
 
     const onAgentSelected = (agentId) => {
         if (!unlockedCharacterIDs.includes(agentId)) {
@@ -103,7 +146,9 @@ function AgentSelect({route, navigation}) {
         })
     }
 
+
     const cols = Math.floor((Dimensions.get("screen").width - 32) / 54)
+
 
     return (
         <View style={styles.mainScreen}>
@@ -130,8 +175,14 @@ function AgentSelect({route, navigation}) {
             <ScrollView style={{width: '100%'}}>
                 {
                     agentSelection &&
-                    agentSelection["AllyTeam"]["Players"].map((player, index) =>
-                        <Agent player={player} showRank={false} onPress={(s) => console.log(s)} agentKey={index}/>)
+                    agentSelection.map((player, index) =>
+                        <Agent playerIdentity={playerIdentities[player["Subject"]]}
+                               player={player}
+                               showRank={false}
+                               onPress={(s) => console.log(s)}
+                               agentKey={index}
+                        />
+                    )
                 }
             </ScrollView>
         </View>

@@ -1,10 +1,25 @@
 import {ImageBackground, StyleSheet, Text, View} from "react-native";
 import mapData from "../data/map-data";
 import Colors from "../constants/Colors";
+import {useContext, useEffect} from "react";
+import {getMatchDetails} from "../utils/game";
+import {AuthContext} from "../store/Auth";
 
 const match = (props) => {
     const {matchDetails} = props
     const mapDetails = mapData.find(map => map.mapUrl === matchDetails.MapID)
+    const {auth} = useContext(AuthContext)
+
+    useEffect(() => {
+        getMatchDetails(auth, matchDetails.MatchID).then(response => {
+            console.log("MATCH_DETAILS ===")
+            console.log(JSON.stringify(response, null, 4))
+        }).catch(err => {
+            console.log(
+                "error fetching match details", err
+            )
+        })
+    }, []);
 
     return (
         <View key={matchDetails.MatchID} style={styles.matchContainer}>

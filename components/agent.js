@@ -8,12 +8,11 @@ import rankData from "../data/rank-data";
 import {getPlayerCompetitveUpdates} from "../utils/game";
 
 export default function Agent(props) {
-    const {player, onPress, agentKey, showRank} = props
+    const {player, playerIdentity, onPress, agentKey, showRank} = props
     const {auth} = useContext(AuthContext);
 
     const [playerTier, setPlayerTier] = useState(0)
 
-    console.log(player)
     useEffect(() => {
         if(!showRank){
             return
@@ -49,7 +48,7 @@ export default function Agent(props) {
                     </View>
                     <View style={styles.gameBoardAgentInfoContainer}>
                         <Card.Section content={[{
-                            text: player.Identity?.GameName || "....",
+                            text: playerIdentity?.GameName || "....",
                             text70: true,
                             grey10: true
                         }]}/>
