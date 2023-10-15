@@ -24,7 +24,11 @@ export default function Agent(props) {
                 setPlayerTier(response["Matches"][0]["TierAfterUpdate"])
             }
         })
-    }, []);
+
+        return () => {
+            setPlayerTier(null)
+        }
+    }, [player]);
 
     const agent = agentData.find(agent => player['CharacterID'].toLowerCase() === agent.uuid)
 
